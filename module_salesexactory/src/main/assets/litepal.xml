@@ -1,0 +1,34 @@
+<?xml version="0.1" encoding="utf-8"?>
+<litepal>
+    <dbname value="industry_qrcode" />            // 数据库名称为litepaldemo，默认以 .db 结尾,如未以此结尾,则自动添加。
+    <version value="1" />                     // 数据库版本为1,每次数据库发生变动版本号必须+1
+    <list>                                    // 有几张表就在list之间写几个mapping
+        // list标签中的实体类都应该继承LitePalSupport这个类,这个千万别忘记，实体类里面不能包含如List类型的字段，否则会报错
+        <mapping class="com.nti.module_salesexactory.bean.SalesFactoryOrderInfo"></mapping>
+        <mapping class="com.nti.module_salesexactory.bean.SalesFactoryDetail"></mapping>
+        <mapping class="com.nti.module_salesexactory.bean.SalesBarcode"></mapping>
+        <mapping class="com.nti.module_returninbound.bean.ReturnInboundOrderInfo"></mapping>
+        <mapping class="com.nti.module_returninbound.bean.ReturnInboundDetail"></mapping>
+        <mapping class="com.nti.module_returninbound.bean.ReturnInboundBarcode"></mapping>
+        <mapping class="com.nti.module_moveoutbound.bean.MoveoutboundOrderInfo"></mapping>
+        <mapping class="com.nti.module_moveoutbound.bean.MoveoutboundDetail"></mapping>
+        <mapping class="com.nti.module_moveoutbound.bean.MoveoutboundBarcode"></mapping>
+        <mapping class="com.nti.module_moveinbound.bean.MoveinboundOrderInfo"></mapping>
+        <mapping class="com.nti.module_moveinbound.bean.MoveinboundDetail"></mapping>
+        <mapping class="com.nti.module_moveinbound.bean.MoveinboundBarcode"></mapping>
+        <mapping class="com.nti.module_produceinbound.bean.ProduceInboundOrderInfo"></mapping>
+        <mapping class="com.nti.module_produceinbound.bean.ProduceInboundDetail"></mapping>
+        <mapping class="com.nti.module_produceinbound.bean.ProduceInboundBarcode"></mapping>
+        <mapping class="com.nti.module_produceoutbound.bean.ProduceoutboundOrderInfo"></mapping>
+        <mapping class="com.nti.module_produceoutbound.bean.ProduceoutboundBarcode"></mapping>
+        <mapping class="com.nti.module_produceoutbound.bean.ProduceoutboundDetail"></mapping>
+        <mapping class="com.nti.module_scrap.bean.ScrapOrderInfo"></mapping>
+        <mapping class="com.nti.module_scrap.bean.ScrapDetail"></mapping>
+        <mapping class="com.nti.module_scrap.bean.ScrapBarcode"></mapping>
+        <mapping class="com.nti.module_loss.bean.LossOrderInfo"></mapping>
+        <mapping class="com.nti.module_loss.bean.LossBarcode"></mapping>
+        <mapping class="com.nti.module_loss.bean.LossDetail"></mapping>
+
+    </list>
+
+</litepal>

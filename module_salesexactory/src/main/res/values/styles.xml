@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="progressbarStyle_Horizontal" parent="android:Widget.ProgressBar.Horizontal">
+        <item name="android:indeterminateOnly">false</item>
+        <item name="android:progressDrawable">@drawable/progress_horizontal</item>
+        <item name="minHeight">20dip</item>
+        <item name="maxHeight">20dip</item>
+    </style>
+
+    <style name="progressbarStyle_Scaned_Horizontal" parent="android:Widget.ProgressBar.Horizontal">
+        <item name="android:indeterminateOnly">false</item>
+        <item name="android:progressDrawable">@drawable/progress_scaned_horizontal</item>
+        <item name="minHeight">20dip</item>
+        <item name="maxHeight">20dip</item>
+    </style>
+
+    <style name="XQRCodeTheme.Custom">
+        <item name="ViewfinderViewStyle">@style/ViewfinderView.Custom</item>
+    </style>
+
+    <style name="ViewfinderView.Custom">
+        <item name="inner_corner_color">@color/colorPrimary</item>
+        <!--<item name="inner_scan_bitmap">@drawable/ic_qrcode_scanning</item>-->
+        <item name="inner_corner_width">6dp</item>
+        <item name="inner_scan_bitmap_tint">@color/colorPrimary</item>
+        <item name="inner_scan_animation_interval">25</item>
+    </style>
+</resources>

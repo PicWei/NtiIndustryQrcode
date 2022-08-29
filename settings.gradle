@@ -1,0 +1,13 @@
+rootProject.name = "Nti-Industry-Qrcode"
+include ':app'
+include ':module_salesexactory'
+include ':lib_common'
+include ':module_returninbound'
+include ':module_device'
+include ':module_moveoutbound'
+include ':module_moveinbound'
+include ':module_produceinbound'
+include ':module_produceoutbound'
+include ':module_scrap'
+include ':module_loss'
+include ':module_version'

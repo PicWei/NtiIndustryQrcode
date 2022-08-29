@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.nti.module_moveoutbound">
+
+    <application>
+        <activity android:name=".activity.CustomCaptureActivity"></activity>
+        <activity android:name=".activity.MoveoutboundDetailActivity" />
+        <activity android:name=".activity.MoveoutboundActivity"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait">
+        </activity>
+    </application>
+
+</manifest>

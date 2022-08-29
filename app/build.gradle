@@ -1,0 +1,99 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    compileSdkVersion 30
+    buildToolsVersion "30.0.3"
+
+    defaultConfig {
+        applicationId "com.nti.nti_industry_qrcode"
+        minSdkVersion 23
+        targetSdkVersion 30
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        javaCompileOptions {
+
+            annotationProcessorOptions {
+                //arouter编译的时候需要的 module名字
+                arguments = [ AROUTER_MODULE_NAME:project.getName()]
+            }
+
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    buildFeatures {
+        viewBinding true
+    }
+    dataBinding {
+        enabled =  true
+    }
+}
+
+dependencies {
+    implementation project(path: ':lib_common')
+    implementation project(path: ':module_salesexactory')
+    implementation project(path: ':module_device')
+    implementation project(path: ':module_returninbound')
+    implementation project(path: ':module_moveoutbound')
+    implementation project(path: ':module_moveinbound')
+    implementation project(path: ':module_produceinbound')
+    implementation project(path: ':module_produceoutbound')
+    implementation project(path: ':module_scrap')
+    implementation project(path: ':module_loss')
+    implementation project(path: ':module_version')
+    implementation 'androidx.appcompat:appcompat:1.2.0'
+    implementation 'com.google.android.material:material:1.2.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.1'
+    implementation 'androidx.navigation:navigation-fragment:2.3.0'
+    implementation 'androidx.navigation:navigation-ui:2.3.0'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    testImplementation 'junit:junit:4.+'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+
+    //圆角、阴影、渐变UI辅助库
+    implementation 'com.ruffian.library:RWidgetHelper-AndroidX:0.0.6'
+    // 沉浸式状态栏
+    implementation 'com.gyf.immersionbar:immersionbar:3.0.0'
+    implementation 'com.gyf.immersionbar:immersionbar-components:3.0.0'
+    //今日头条屏幕适配
+    implementation 'me.jessyan:autosize:1.2.1'
+
+    implementation 'com.squareup.retrofit2:retrofit:2.1.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.1.0'
+    implementation 'com.squareup.retrofit2:adapter-rxjava2:2.4.0'
+
+    implementation 'com.jakewharton:butterknife:10.0.0'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:10.0.0'
+
+    //路由管理
+    implementation 'com.alibaba:arouter-api:1.5.1'
+    annotationProcessor 'com.alibaba:arouter-compiler:1.5.1'
+
+ //   implementation 'com.blankj:utilcodex:1.30.6'
+
+    implementation 'io.reactivex.rxjava2:rxjava:2.2.7'
+    implementation 'io.reactivex.rxjava2:rxandroid:2.1.0'
+
+    //sqlite数据库
+    implementation 'org.litepal.android:java:3.0.0'
+
+//    implementation "com.lxj:xpopup:2.2.18"
+    implementation 'com.github.li-xiaojun:XPopup:2.8.14'
+
+
+}

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.ruffian.library.widget.RConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:background_normal="@color/white"
+    app:corner_radius="10dp">
+
+    <TextView
+        android:id="@+id/tv_title"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:gravity="center"
+        android:text="提示"
+        android:textStyle="bold"
+        android:textColor="@color/black"
+        android:textSize="16sp"
+        android:visibility="gone"/>
+
+    <TextView
+        app:layout_constraintTop_toBottomOf="@+id/tv_title"
+        android:id="@+id/tv_content"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:gravity="center"
+        android:textSize="16sp"
+        android:text="@string/incomplete_tips" />
+
+    <View
+        android:id="@+id/view"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#ffe2e5ef"
+        app:layout_constraintTop_toBottomOf="@+id/tv_content"/>
+
+    <TextView
+        android:id="@+id/tv_cancel"
+        android:layout_width="0dp"
+        android:layout_height="42dp"
+        android:gravity="center"
+        android:textColor="#ff666666"
+        android:textSize="14sp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/view"
+        app:layout_constraintHorizontal_weight="1"
+        tools:text="取消"
+        app:layout_constraintRight_toLeftOf="@+id/tv_confirm"/>
+
+    <TextView
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/view"
+        android:background="#ff0083f5"
+        android:id="@+id/tv_confirm"
+        android:layout_width="0dp"
+        android:layout_height="42dp"
+        app:layout_constraintHorizontal_weight="1"
+        android:gravity="center"
+        android:textColor="@color/white"
+        android:textSize="14sp"
+        tools:text="确定"
+        app:layout_constraintLeft_toRightOf="@+id/tv_cancel"/>
+
+
+
+</com.ruffian.library.widget.RConstraintLayout>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CommonTitleBar">
+        <attr name="title" format="string" />
+        <attr name="sub_title" format="string" />
+        <attr name="is_back_visible" format="boolean" />
+        <attr name="background_color" format="reference" />
+        <attr name="is_auto_close" format="boolean" />
+        <attr name="is_refresh_visible" format="boolean"/>
+        <attr name="is_right_visible" format="boolean"/>
+        <attr name="right_title" format="string"/>
+    </declare-styleable>
+</resources>

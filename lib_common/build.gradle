@@ -1,0 +1,66 @@
+plugins {
+    id 'com.android.library'
+}
+
+android {
+    compileSdkVersion 30
+    buildToolsVersion "30.0.3"
+
+    defaultConfig {
+        minSdkVersion 23
+        targetSdkVersion 30
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    dataBinding {
+        enabled = true
+    }
+}
+
+dependencies {
+
+    implementation 'androidx.appcompat:appcompat:1.2.0'
+    implementation 'com.google.android.material:material:1.2.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.1'
+    testImplementation 'junit:junit:4.+'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+
+    // 沉浸式状态栏
+    implementation 'com.gyf.immersionbar:immersionbar:3.0.0'
+//    implementation "com.lxj:xpopup:2.2.18"
+    implementation 'com.github.li-xiaojun:XPopup:2.8.14'
+
+    implementation 'com.squareup.retrofit2:retrofit:2.1.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.1.0'
+    implementation 'com.squareup.retrofit2:adapter-rxjava2:2.4.0'
+    implementation 'io.reactivex.rxjava2:rxjava:2.2.7'
+    implementation 'io.reactivex.rxjava2:rxandroid:2.1.0'
+    api 'com.squareup.okhttp3:okhttp:3.9.0'
+    api 'com.squareup.okhttp3:logging-interceptor:3.5.0'
+    implementation 'com.blankj:utilcodex:1.30.6'
+
+    //XQRCode二维码扫描
+    implementation 'com.github.xuexiangjys:XQRCode:1.0.6'
+    implementation 'com.github.xuexiangjys.XAOP:xaop-runtime:1.0.5x'
+
+    //sqlite数据库
+    implementation 'org.litepal.android:java:3.0.0'
+
+    //圆角、阴影、渐变UI辅助库
+    implementation 'com.ruffian.library:RWidgetHelper-AndroidX:0.0.6'
+}

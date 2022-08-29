@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.nti.module_loss">
+
+    <application>
+        <activity android:name=".activity.LossDetailActivity"></activity>
+        <activity
+            android:name=".activity.LossActivity"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait"></activity>
+    </application>
+
+</manifest>
