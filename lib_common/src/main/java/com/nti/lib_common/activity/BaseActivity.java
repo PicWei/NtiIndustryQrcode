@@ -14,6 +14,8 @@ import com.nti.lib_common.R;
  */
 public class BaseActivity extends AppCompatActivity {
 
+    
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
