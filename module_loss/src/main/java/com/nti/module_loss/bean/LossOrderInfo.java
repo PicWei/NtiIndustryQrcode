@@ -35,6 +35,8 @@ public class LossOrderInfo extends LitePalSupport {
     //单据状态 0-未启动扫描 1-扫描中 2-已确认 3-未确认 4-已启动 5-已回送
     private String BB_STATE;
 
+    private String A_NO;
+
     private boolean ispressed;
 
     private String PDA_SCANNER_IS_END;
@@ -163,6 +165,14 @@ public class LossOrderInfo extends LitePalSupport {
         this.BB_STATE = BB_STATE;
     }
 
+    public String getA_NO() {
+        return A_NO;
+    }
+
+    public void setA_NO(String a_NO) {
+        A_NO = a_NO;
+    }
+
     public boolean isIspressed() {
         return ispressed;
     }
@@ -195,6 +205,7 @@ public class LossOrderInfo extends LitePalSupport {
                 ", BB_FLOW_NAME='" + BB_FLOW_NAME + '\'' +
                 ", BB_TOTAL_PNUM='" + BB_TOTAL_PNUM + '\'' +
                 ", BB_STATE='" + BB_STATE + '\'' +
+                ", A_NO='" + A_NO + '\'' +
                 ", ispressed=" + ispressed +
                 ", PDA_SCANNER_IS_END='" + PDA_SCANNER_IS_END + '\'' +
                 '}';

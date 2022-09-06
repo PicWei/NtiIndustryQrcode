@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.alibaba.android.arouter.launcher.ARouter;
 import com.google.gson.JsonObject;
+import com.nti.lib_common.bean.DataResult;
 import com.nti.lib_common.bean.SalesBarcodeParamer;
 import com.nti.lib_common.bean.SalesOrderParamer;
 import com.nti.lib_common.bean.SellBarcodeReciveParamer;
@@ -190,10 +191,11 @@ public class CompletedFragment extends Fragment {
                 String SYSTEM_SERV = "INDUT_OUT_SCRAP";
                 UploadSellParamer uploadSellParamer = new UploadSellParamer(sellParamers, SYSTEM_SERV);
                 SellBarcodeReciveParamer paramer = new SellBarcodeReciveParamer(uploadSellParamer);
-                viewModel.sellBarcodeRecive(paramer).observe(getActivity(), new Observer<JsonObject>() {
+                viewModel.sellBarcodeRecive(paramer).observe(getActivity(), new Observer<DataResult<JsonObject>>() {
                     @Override
-                    public void onChanged(JsonObject jsonObject) {
-                        if (jsonObject == null){
+                    public void onChanged(DataResult<JsonObject> dataResult) {
+
+                        /*if (jsonObject == null){
                             Toast.makeText(getActivity(), "网络异常", Toast.LENGTH_SHORT).show();
                         }else {
                             String code = jsonObject.get("code").toString().replace("\"", "");
@@ -219,8 +221,8 @@ public class CompletedFragment extends Fragment {
                             }else {
                                 Toast.makeText(getActivity(), R.string.sumbit_expection, Toast.LENGTH_SHORT).show();
                             }
+                        }*/
 
-                        }
                     }
                 });
 

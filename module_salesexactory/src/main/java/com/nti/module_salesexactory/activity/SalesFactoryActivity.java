@@ -13,6 +13,7 @@ import android.widget.Toast;
 import com.lxj.xpopup.XPopup;
 import com.lxj.xpopup.impl.LoadingPopupView;
 import com.nti.lib_common.activity.BaseActivity;
+import com.nti.lib_common.bean.DataResult;
 import com.nti.lib_common.bean.MessageEvent;
 import com.nti.lib_common.constants.BusinessType;
 import com.nti.lib_common.utils.DeviceUtils;
@@ -58,18 +59,49 @@ public class SalesFactoryActivity extends BaseActivity implements View.OnClickLi
         Paramer paramer = new Paramer(params);
         if (loadingPopup == null) {
             loadingPopup = (LoadingPopupView)new XPopup.Builder(this)
-                    .dismissOnBackPressed(true)
+                    .dismissOnTouchOutside(false)
+                    .dismissOnBackPressed(false)
                     .isLightNavigationBar(true)
                     .asLoading("加载中...")
                     .show();
         }else {
             loadingPopup.show();
         }
-        viewModel.PDA_H(paramer).observe(this, new Observer<List<SalesFactoryOrderInfo>>() {
+        viewModel.PDA_H(paramer).observe(this, new Observer<DataResult<List<SalesFactoryOrderInfo>>>() {
             @Override
-            public void onChanged(List<SalesFactoryOrderInfo> salesFactoryOrderInfos) {
+            public void onChanged(DataResult<List<SalesFactoryOrderInfo>> dataResult) {
                 loadingPopup.dismiss();
-                if (salesFactoryOrderInfos == null){
+                int errcode = dataResult.getErrcode();
+                if (errcode == -1){
+                    Toast.makeText(SalesFactoryActivity.this, "网络异常", Toast.LENGTH_SHORT).show();
+                }else if (errcode == 0){
+                    List<SalesFactoryOrderInfo> salesFactoryOrderInfos = dataResult.getT();
+                    if (salesFactoryOrderInfos == null || salesFactoryOrderInfos.isEmpty()){
+                        binding.incompleteCl.performClick();
+                        List<SalesFactoryOrderInfo> orderInfos = LitePal.where("BB_STATE = ?", "4").find(SalesFactoryOrderInfo.class);
+                        List<SalesFactoryOrderInfo> orderInfos2 = LitePal.where("BB_STATE = ?", "1").find(SalesFactoryOrderInfo.class);
+                        List<SalesFactoryOrderInfo> orderInfos3 = LitePal.where("BB_STATE = ? and PDA_SCANNER_IS_END = ?", "3", "0").find(SalesFactoryOrderInfo.class);
+                        int incompleteNum = orderInfos.size();
+                        int ongoingNum = orderInfos2.size();
+                        int completeNUm = orderInfos3.size();
+                        binding.incompleteNum.setText(incompleteNum+"");
+                        binding.ongoingNum.setText(ongoingNum+"");
+                        binding.completedNum.setText(completeNUm+"");
+                        Toast.makeText(SalesFactoryActivity.this, "数据为空", Toast.LENGTH_SHORT).show();
+                    }else {
+                        binding.incompleteCl.performClick();
+                        List<SalesFactoryOrderInfo> orderInfos = LitePal.where("BB_STATE = ?", "4").find(SalesFactoryOrderInfo.class);
+                        List<SalesFactoryOrderInfo> orderInfos2 = LitePal.where("BB_STATE = ?", "1").find(SalesFactoryOrderInfo.class);
+                        List<SalesFactoryOrderInfo> orderInfos3 = LitePal.where("BB_STATE = ? and PDA_SCANNER_IS_END = ?", "3", "0").find(SalesFactoryOrderInfo.class);
+                        int incompleteNum = orderInfos.size();
+                        int ongoingNum = orderInfos2.size();
+                        int completeNUm = orderInfos3.size();
+                        binding.incompleteNum.setText(incompleteNum+"");
+                        binding.ongoingNum.setText(ongoingNum+"");
+                        binding.completedNum.setText(completeNUm+"");
+                    }
+                }
+                /*if (salesFactoryOrderInfos == null){
                     Toast.makeText(SalesFactoryActivity.this, "数据为空", Toast.LENGTH_SHORT).show();
                 }else {
                     binding.incompleteCl.performClick();
@@ -82,7 +114,7 @@ public class SalesFactoryActivity extends BaseActivity implements View.OnClickLi
                     binding.incompleteNum.setText(incompleteNum+"");
                     binding.ongoingNum.setText(ongoingNum+"");
                     binding.completedNum.setText(completeNUm+"");
-                }
+                }*/
             }
         });
     }
@@ -129,36 +161,68 @@ public class SalesFactoryActivity extends BaseActivity implements View.OnClickLi
             getSupportFragmentManager().beginTransaction().replace(R.id.container, completedFragment).commit();
         }else if ((view.getId()) == R.id.right_cl){
             String deviceId = DeviceUtils.getDevUUID(this);
+
             String SYSTEM_SERVICE_TYPE = "INDUT_SALES_FACTORY";
             Params params = new Params(deviceId, SYSTEM_SERVICE_TYPE);
             Paramer paramer = new Paramer(params);
             if (loadingPopup == null) {
                 loadingPopup = (LoadingPopupView)new XPopup.Builder(this)
-                        .dismissOnBackPressed(true)
+                        .dismissOnTouchOutside(false)
+                        .dismissOnBackPressed(false)
                         .isLightNavigationBar(true)
                         .asLoading("加载中...")
                         .show();
             }else {
                 loadingPopup.show();
             }
-            viewModel.PDA_H(paramer).observe(this, new Observer<List<SalesFactoryOrderInfo>>() {
+            viewModel.PDA_H(paramer).observe(this, new Observer<DataResult<List<SalesFactoryOrderInfo>>>() {
                 @Override
-                public void onChanged(List<SalesFactoryOrderInfo> salesFactoryOrderInfos) {
+                public void onChanged(DataResult<List<SalesFactoryOrderInfo>> dataResult) {
                     loadingPopup.dismiss();
-                    if (salesFactoryOrderInfos == null){
-                        Toast.makeText(SalesFactoryActivity.this, "数据为空", Toast.LENGTH_SHORT).show();
-                    }else {
-                        binding.incompleteCl.performClick();
-                        List<SalesFactoryOrderInfo> orderInfos = LitePal.where("BB_STATE = ?", "4").find(SalesFactoryOrderInfo.class);
-                        List<SalesFactoryOrderInfo> orderInfos2 = LitePal.where("BB_STATE = ?", "1").find(SalesFactoryOrderInfo.class);
-                        List<SalesFactoryOrderInfo> orderInfos3 = LitePal.where("BB_STATE = ?", "3").find(SalesFactoryOrderInfo.class);
-                        int incompleteNum = orderInfos.size();
-                        int ongoingNum = orderInfos2.size();
-                        int completeNUm = orderInfos3.size();
-                        binding.incompleteNum.setText(incompleteNum+"");
-                        binding.ongoingNum.setText(ongoingNum+"");
-                        binding.completedNum.setText(completeNUm+"");
+                    int errcode = dataResult.getErrcode();
+                    if (errcode == -1){
+                        Toast.makeText(SalesFactoryActivity.this, "网络异常", Toast.LENGTH_SHORT).show();
+                    }else if (errcode == 0){
+                        List<SalesFactoryOrderInfo> salesFactoryOrderInfos = dataResult.getT();
+                        if (salesFactoryOrderInfos == null || salesFactoryOrderInfos.isEmpty()){
+                            binding.incompleteCl.performClick();
+                            List<SalesFactoryOrderInfo> orderInfos = LitePal.where("BB_STATE = ?", "4").find(SalesFactoryOrderInfo.class);
+                            List<SalesFactoryOrderInfo> orderInfos2 = LitePal.where("BB_STATE = ?", "1").find(SalesFactoryOrderInfo.class);
+                            List<SalesFactoryOrderInfo> orderInfos3 = LitePal.where("BB_STATE = ? and PDA_SCANNER_IS_END = ?", "3", "0").find(SalesFactoryOrderInfo.class);
+                            int incompleteNum = orderInfos.size();
+                            int ongoingNum = orderInfos2.size();
+                            int completeNUm = orderInfos3.size();
+                            binding.incompleteNum.setText(incompleteNum+"");
+                            binding.ongoingNum.setText(ongoingNum+"");
+                            binding.completedNum.setText(completeNUm+"");
+                            Toast.makeText(SalesFactoryActivity.this, "数据为空", Toast.LENGTH_SHORT).show();
+                        }else {
+                            binding.incompleteCl.performClick();
+                            List<SalesFactoryOrderInfo> orderInfos = LitePal.where("BB_STATE = ?", "4").find(SalesFactoryOrderInfo.class);
+                            List<SalesFactoryOrderInfo> orderInfos2 = LitePal.where("BB_STATE = ?", "1").find(SalesFactoryOrderInfo.class);
+                            List<SalesFactoryOrderInfo> orderInfos3 = LitePal.where("BB_STATE = ? and PDA_SCANNER_IS_END = ?", "3", "0").find(SalesFactoryOrderInfo.class);
+                            int incompleteNum = orderInfos.size();
+                            int ongoingNum = orderInfos2.size();
+                            int completeNUm = orderInfos3.size();
+                            binding.incompleteNum.setText(incompleteNum+"");
+                            binding.ongoingNum.setText(ongoingNum+"");
+                            binding.completedNum.setText(completeNUm+"");
+                        }
                     }
+                /*if (salesFactoryOrderInfos == null){
+                    Toast.makeText(SalesFactoryActivity.this, "数据为空", Toast.LENGTH_SHORT).show();
+                }else {
+                    binding.incompleteCl.performClick();
+                    List<SalesFactoryOrderInfo> orderInfos = LitePal.where("BB_STATE = ?", "4").find(SalesFactoryOrderInfo.class);
+                    List<SalesFactoryOrderInfo> orderInfos2 = LitePal.where("BB_STATE = ?", "1").find(SalesFactoryOrderInfo.class);
+                    List<SalesFactoryOrderInfo> orderInfos3 = LitePal.where("BB_STATE = ? and PDA_SCANNER_IS_END = ?", "3", "0").find(SalesFactoryOrderInfo.class);
+                    int incompleteNum = orderInfos.size();
+                    int ongoingNum = orderInfos2.size();
+                    int completeNUm = orderInfos3.size();
+                    binding.incompleteNum.setText(incompleteNum+"");
+                    binding.ongoingNum.setText(ongoingNum+"");
+                    binding.completedNum.setText(completeNUm+"");
+                }*/
                 }
             });
         }

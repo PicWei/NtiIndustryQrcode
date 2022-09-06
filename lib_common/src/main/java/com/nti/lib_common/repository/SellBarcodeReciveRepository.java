@@ -5,11 +5,15 @@ import android.util.Log;
 import androidx.lifecycle.MutableLiveData;
 
 import com.google.gson.JsonObject;
+import com.nti.lib_common.bean.DataResult;
 import com.nti.lib_common.bean.SellBarcodeReciveParamer;
 import com.nti.lib_common.service.ISellBarcodeReciveService;
 import com.nti.lib_common.utils.HttpUtils;
 
 import org.jetbrains.annotations.NotNull;
+
+import java.net.UnknownHostException;
+import java.util.concurrent.TimeoutException;
 
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -22,8 +26,8 @@ import io.reactivex.schedulers.Schedulers;
  * @describe
  */
 public class SellBarcodeReciveRepository {
-    public MutableLiveData<JsonObject> sellBarcodeRecive(SellBarcodeReciveParamer paramer){
-        final MutableLiveData<JsonObject> data = new MutableLiveData<>();
+    public MutableLiveData<DataResult<JsonObject>> sellBarcodeRecive(SellBarcodeReciveParamer paramer){
+        final MutableLiveData<DataResult<JsonObject>> data = new MutableLiveData<>();
 
         HttpUtils.getInstance().with(ISellBarcodeReciveService.class).sellBarcodeRecive(paramer)
                 .subscribeOn(Schedulers.io())
@@ -36,13 +40,14 @@ public class SellBarcodeReciveRepository {
 
                     @Override
                     public void onNext(@NotNull JsonObject jsonObject) {
-                        data.setValue(jsonObject);
-                        Log.i("TAG", "jsonObject:" + jsonObject.toString());
+                        DataResult<JsonObject> dataResult = new DataResult<>(0, jsonObject);
+                        data.setValue(dataResult);
                     }
 
                     @Override
                     public void onError(@NotNull Throwable e) {
-                        data.setValue(null);
+                        DataResult<JsonObject> dataResult = new DataResult<>(-1, null);
+                        data.setValue(dataResult);
                     }
 
                     @Override

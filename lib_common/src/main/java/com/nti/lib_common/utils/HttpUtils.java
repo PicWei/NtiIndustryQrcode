@@ -55,8 +55,8 @@ public class HttpUtils {
     public Retrofit buildRetrofit() {
         Retrofit retrofit = null;
         OkHttpClient.Builder mBuilder = null;
-        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
-        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+        /*HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
+        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);*/
         try {
             SSLContext sslContext = SSLContext.getInstance("SSL");
             sslContext.init(null, new TrustManager[]{trustManager}, new SecureRandom());
@@ -72,8 +72,8 @@ public class HttpUtils {
                     .client(mBuilder.build())
                     .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                     .addConverterFactory(GsonConverterFactory.create())
-      //              .baseUrl("https://it.nti56.com").build();
-                    .baseUrl("http://10.1.21.201:31091").build();
+       //             .baseUrl("https://it.nti56.com").build();
+                    .baseUrl("http://10.1.20.166:10012").build();
         }catch (Exception e){
             e.printStackTrace();
         }

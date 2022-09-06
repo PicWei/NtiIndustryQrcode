@@ -7,6 +7,7 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.MutableLiveData;
 
 import com.google.gson.JsonObject;
+import com.nti.lib_common.bean.DataResult;
 import com.nti.module_salesexactory.bean.Paramer;
 import com.nti.module_salesexactory.bean.SalesFactoryOrderInfo;
 import com.nti.module_salesexactory.bean.UpParamer;
@@ -24,14 +25,14 @@ import java.util.List;
 public class IncompleteViewModel extends AndroidViewModel {
 
     private MutableLiveData<JsonObject> data;
-    private MutableLiveData<List<SalesFactoryOrderInfo>> data2 = new MutableLiveData<>();
+    private MutableLiveData<DataResult<List<SalesFactoryOrderInfo>>> data2 = new MutableLiveData<>();
     private IncompleteRepository repository = new IncompleteRepository();
 
     public IncompleteViewModel(@NonNull @NotNull Application application) {
         super(application);
     }
 
-    public MutableLiveData<List<SalesFactoryOrderInfo>> PDA_H(Paramer paramer){
+    public MutableLiveData<DataResult<List<SalesFactoryOrderInfo>>> PDA_H(Paramer paramer){
         data2 = repository.PDA_H(paramer);
         return data2;
     }

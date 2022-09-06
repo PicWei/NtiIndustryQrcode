@@ -76,6 +76,8 @@ public class ProduceoutboundDetailActivity extends BaseActivity implements View.
     private float volumnRatio;
     private String BI_SCANNER_CODE;
     private ProduceoutboundViewModel viewModel;
+    private String A_NO;
+
     /**
      * 扫描跳转Activity RequestCode
      */
@@ -88,7 +90,6 @@ public class ProduceoutboundDetailActivity extends BaseActivity implements View.
     @Autowired
     public String uuid;
 
-    private String A_NO;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

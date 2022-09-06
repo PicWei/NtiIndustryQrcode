@@ -55,7 +55,6 @@ public class BarcodeListPopup extends BottomPopupView {
         adapter.setOnDeleteListener(new BarcodeAdapter.OnDeleteListener() {
             @Override
             public void onDeleteListener(View view, int position) {
-                list.remove(position);
                 String barcode = list.get(position).getBarcode();
                 String pcigcode = list.get(position).getPcigcode();
                 List<SalesFactoryDetail> detailList = LitePal.where("BD_PCIG_CODE = ?", pcigcode).find(SalesFactoryDetail.class);
@@ -74,6 +73,7 @@ public class BarcodeListPopup extends BottomPopupView {
                 orderInfo.setBB_TOTAL_SCAN_NUM(totalscanednumStr);
                 orderInfo.saveOrUpdate("BB_UUID = ?", uuid);
                 LitePal.deleteAll(SalesBarcode.class, "barcode = ?", barcode);
+                list.remove(position);
                 adapter.notifyDataSetChanged();
             }
         });

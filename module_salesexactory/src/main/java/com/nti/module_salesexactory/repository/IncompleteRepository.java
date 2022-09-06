@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.nti.lib_common.bean.DataResult;
 import com.nti.module_salesexactory.bean.Paramer;
 import com.nti.module_salesexactory.bean.SalesBarcode;
 import com.nti.module_salesexactory.bean.SalesFactoryDetail;
@@ -32,8 +33,8 @@ import io.reactivex.schedulers.Schedulers;
  * @describe
  */
 public class IncompleteRepository {
-    public MutableLiveData<List<SalesFactoryOrderInfo>> PDA_H(Paramer paramer){
-        final MutableLiveData<List<SalesFactoryOrderInfo>> data = new MutableLiveData<>();
+    public MutableLiveData<DataResult<List<SalesFactoryOrderInfo>>> PDA_H(Paramer paramer){
+        final MutableLiveData<DataResult<List<SalesFactoryOrderInfo>>> data = new MutableLiveData<>();
         final List<SalesFactoryOrderInfo> orderInfos = new ArrayList<>();
         HttpUtils.getInstance().with(IncompleteService.class).PDA_H(paramer)
                 .subscribeOn(Schedulers.io())
@@ -46,6 +47,7 @@ public class IncompleteRepository {
 
                     @Override
                     public void onNext(@NotNull JsonObject jsonObject) {
+                        Log.i("TAG", "jsonObject:" + jsonObject.toString());
                         JsonArray jsonArray1 = jsonObject.getAsJsonArray("CONTRACT_DETAIL_LIST");
                         List<SalesFactoryDetail> salesFactoryDetails = new ArrayList<>();
                         try {
@@ -166,7 +168,9 @@ public class IncompleteRepository {
                         try {
                             LitePal.deleteAll(SalesFactoryOrderInfo.class);
                             LitePal.saveAll(orderInfos);
-                            data.setValue(orderInfos);
+             //               data.setValue(orderInfos);
+                            DataResult<List<SalesFactoryOrderInfo>> dataResult = new DataResult(0 , orderInfos);
+                            data.setValue(dataResult);
                         }catch (Exception e){
                             e.printStackTrace();
                         }
@@ -175,7 +179,9 @@ public class IncompleteRepository {
 
                     @Override
                     public void onError(@NotNull Throwable e) {
-                        data.setValue(null);
+                        Log.i("TAG", "e:" + e.getMessage());
+                        DataResult<List<SalesFactoryOrderInfo>> dataResult = new DataResult(-1, orderInfos);
+                        data.setValue(dataResult);
                     }
 
                     @Override
@@ -199,13 +205,11 @@ public class IncompleteRepository {
 
                     @Override
                     public void onNext(@NotNull JsonObject jsonObject) {
-                        Log.i("TAG", "jsonObject:" + jsonObject.toString());
                         data.setValue(jsonObject);
                     }
 
                     @Override
                     public void onError(@NotNull Throwable e) {
-                        Log.i("TAG", "e:" + e.getMessage());
                         data.setValue(null);
                     }
 
