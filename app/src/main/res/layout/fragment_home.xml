@@ -401,12 +401,65 @@
             </com.ruffian.library.widget.RRelativeLayout>
 
             <com.ruffian.library.widget.RRelativeLayout
+                android:id="@+id/rr_bfbm"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:background_normal="@mipmap/rkbf"
+                app:corner_radius="5dp"
+                app:layout_constraintTop_toBottomOf="@+id/rr_bf">
+                <ImageView
+                    android:id="@+id/bfbm_iv"
+                    android:layout_width="55dp"
+                    android:layout_height="55dp"
+                    android:src="@mipmap/rkbf_logo"
+                    android:layout_marginTop="18dp"
+                    android:layout_marginLeft="28dp"/>
+
+                <TextView
+                    android:id="@+id/bfbm_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="14dp"
+                    android:layout_marginTop="32dp"
+                    android:layout_toRightOf="@+id/bfbm_iv"
+                    android:text="工业出入库报废补码"
+                    android:textColor="@color/white"
+                    android:textSize="20sp" />
+                <com.ruffian.library.widget.RRelativeLayout
+                    android:layout_width="75dp"
+                    android:layout_height="24dp"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginTop="32dp"
+                    android:layout_marginRight="30dp"
+                    app:corner_radius="15dp"
+                    app:background_normal="#d9ffffff">
+                    <TextView
+                        android:id="@+id/enter_tv8"
+                        android:layout_width="30dp"
+                        android:layout_height="wrap_content"
+                        android:text="进入"
+                        android:layout_centerVertical="true"
+                        android:textSize="15sp"
+                        android:layout_marginLeft="12dp"
+                        android:textColor="#fff06f59"/>
+                    <ImageView
+                        android:layout_width="8dp"
+                        android:layout_height="8dp"
+                        android:src="@mipmap/arrow_4"
+                        android:textColor="#ffff8d26"
+                        android:layout_centerVertical="true"
+                        android:layout_toRightOf="@+id/enter_tv7"
+                        android:layout_marginLeft="14dp"/>
+                </com.ruffian.library.widget.RRelativeLayout>
+            </com.ruffian.library.widget.RRelativeLayout>
+
+            <com.ruffian.library.widget.RRelativeLayout
                 android:id="@+id/rr_sy"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:background_normal="@mipmap/rkbf"
                 app:corner_radius="5dp"
-                app:layout_constraintTop_toBottomOf="@+id/rr_bf"
+                app:layout_constraintTop_toBottomOf="@+id/rr_bfbm"
                 app:layout_constraintBottom_toBottomOf="parent"
                 android:layout_marginBottom="60dp">
                 <ImageView
@@ -435,7 +488,7 @@
                     app:corner_radius="15dp"
                     app:background_normal="#d9ffffff">
                     <TextView
-                        android:id="@+id/enter_tv8"
+                        android:id="@+id/enter_tv9"
                         android:layout_width="30dp"
                         android:layout_height="wrap_content"
                         android:text="进入"

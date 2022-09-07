@@ -41,6 +41,7 @@ public class HomeFragment extends SimpleImmersionFragment implements View.OnClic
         binding.rrThck.setOnClickListener(this);
         binding.rrBf.setOnClickListener(this);
         binding.rrSy.setOnClickListener(this);
+        binding.rrBfbm.setOnClickListener(this);
         return root;
     }
 
@@ -92,10 +93,15 @@ public class HomeFragment extends SimpleImmersionFragment implements View.OnClic
                 ARouter.getInstance().build(ARouterPath.SCRAP_PATH)
                         .navigation();
                 break;
+            case R.id.rr_bfbm:
+                ARouter.getInstance().build(ARouterPath.SCRAP_CODE_PATH)
+                        .navigation();
+                break;
             case R.id.rr_sy:
                 ARouter.getInstance().build(ARouterPath.LOSS_PAT)
                         .navigation();
                 break;
+
         }
     }
 }

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout>
+    <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="12dp"
+        android:paddingTop="15dp"
+        android:paddingBottom="15dp"
+        android:paddingRight="12dp"
+        xmlns:app="http://schemas.android.com/apk/res-auto">
+        <TextView
+            android:id="@+id/brand_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            android:textSize="14sp"
+            android:textColor="#ff333333"
+            android:text="6901028315913-玉溪(软)"/>
+        <ProgressBar
+            android:id="@+id/progressbar"
+            android:layout_width="229dp"
+            android:layout_height="8dp"
+            style="@style/progressbarStyle_Horizontal"
+            app:layout_constraintTop_toBottomOf="@+id/brand_name"
+            app:layout_constraintLeft_toLeftOf="@+id/brand_name"
+            android:layout_marginTop="11dp"/>
+        <ProgressBar
+            android:id="@+id/progressbar_scaned"
+            android:layout_width="229dp"
+            android:layout_height="8dp"
+            style="@style/progressbarStyle_Scaned_Horizontal"
+            app:layout_constraintTop_toBottomOf="@+id/brand_name"
+            app:layout_constraintLeft_toLeftOf="@+id/brand_name"
+            android:layout_marginTop="11dp"
+            android:visibility="gone"/>
+        <View
+            android:id="@+id/scan_dot"
+            android:layout_width="7dp"
+            android:layout_height="7dp"
+            app:layout_constraintTop_toTopOf="@+id/status"
+            app:layout_constraintBottom_toBottomOf="@+id/status"
+            app:layout_constraintRight_toLeftOf="@+id/status"
+            android:background="@drawable/scaning_dot"
+            android:layout_marginRight="5dp" />
+        <TextView
+            android:id="@+id/status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="扫描中"
+            android:textColor="#ff0083f5"
+            android:textSize="14sp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintRight_toRightOf="parent"/>
+        <TextView
+            android:id="@+id/progress_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@+id/status"
+            app:layout_constraintLeft_toLeftOf="@+id/scan_dot"
+            app:layout_constraintRight_toRightOf="parent"
+            android:layout_marginTop="3dp"
+            android:text="112/123"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
