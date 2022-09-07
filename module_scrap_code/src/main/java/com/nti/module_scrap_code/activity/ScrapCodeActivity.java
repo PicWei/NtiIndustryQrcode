@@ -1,4 +1,4 @@
-package com.nti.module_scrap.activity;
+package com.nti.module_scrap_code.activity;
 
 
 import android.os.Bundle;
@@ -21,13 +21,16 @@ import com.nti.lib_common.bean.Params;
 import com.nti.lib_common.constants.ARouterPath;
 import com.nti.lib_common.constants.BusinessType;
 import com.nti.lib_common.utils.DeviceUtils;
-import com.nti.module_scrap.R;
-import com.nti.module_scrap.bean.ScrapCodeOrderInfo;
-import com.nti.module_scrap.databinding.ActivityScrapBinding;
-import com.nti.module_scrap.fragment.CompletedFragment;
-import com.nti.module_scrap.fragment.IncompleteFragment;
-import com.nti.module_scrap.fragment.OngoingFragment;
-import com.nti.module_scrap.viewmodel.ScrapCodeViewModel;
+
+
+import com.nti.module_scrap_code.fragment.OngoingFragment;
+import com.nti.module_scrap_code.R;
+import com.nti.module_scrap_code.bean.ScrapCodeOrderInfo;
+import com.nti.module_scrap_code.viewmodel.ScrapCodeViewModel;
+import com.nti.module_scrap_code.databinding.ActivityScrapCodeBinding;
+import com.nti.module_scrap_code.fragment.CompletedFragment;
+import com.nti.module_scrap_code.fragment.IncompleteFragment;
+
 
 
 import org.greenrobot.eventbus.EventBus;
@@ -39,7 +42,7 @@ import java.util.List;
 @Route(path = ARouterPath.SCRAP_CODE_PATH)
 public class ScrapCodeActivity extends BaseActivity implements View.OnClickListener {
 
-    private ActivityScrapBinding binding;
+    private ActivityScrapCodeBinding binding;
     private ScrapCodeViewModel viewModel;
     private LoadingPopupView loadingPopup;
     private int current = 1;
@@ -48,7 +51,7 @@ public class ScrapCodeActivity extends BaseActivity implements View.OnClickListe
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_scrap);
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_scrap_code);
         EventBus.getDefault().register(this);
         binding.incompleteCl.setOnClickListener(this);
         binding.ongoingCl.setOnClickListener(this);
@@ -71,7 +74,7 @@ public class ScrapCodeActivity extends BaseActivity implements View.OnClickListe
         viewModel.PDA_H(paramer).observe(this, new Observer<List<ScrapCodeOrderInfo>>() {
             @Override
             public void onChanged(List<ScrapCodeOrderInfo> ScrapOrderInfos) {
-                Log.i("TAG", "ScrapOrderInfos:" + ScrapOrderInfos.toString());
+//                Log.i("TAG", "ScrapOrderInfos:" + ScrapOrderInfos.toString());
                 loadingPopup.dismiss();
                 if (ScrapOrderInfos == null){
                     Toast.makeText(ScrapCodeActivity.this, "数据为空", Toast.LENGTH_SHORT).show();

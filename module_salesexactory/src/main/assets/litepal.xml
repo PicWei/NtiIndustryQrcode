@@ -25,6 +25,11 @@
         <mapping class="com.nti.module_scrap.bean.ScrapOrderInfo"></mapping>
         <mapping class="com.nti.module_scrap.bean.ScrapDetail"></mapping>
         <mapping class="com.nti.module_scrap.bean.ScrapBarcode"></mapping>
+
+        <mapping class="com.nti.module_scrap_code.bean.ScrapCodeOrderInfo"></mapping>
+        <mapping class="com.nti.module_scrap_code.bean.ScrapCodeDetail"></mapping>
+        <mapping class="com.nti.module_scrap_code.bean.ScrapCodeBarcode"></mapping>
+
         <mapping class="com.nti.module_loss.bean.LossOrderInfo"></mapping>
         <mapping class="com.nti.module_loss.bean.LossBarcode"></mapping>
         <mapping class="com.nti.module_loss.bean.LossDetail"></mapping>

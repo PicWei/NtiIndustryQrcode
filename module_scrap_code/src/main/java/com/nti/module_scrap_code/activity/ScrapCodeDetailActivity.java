@@ -1,4 +1,4 @@
-package com.nti.module_scrap.activity;
+package com.nti.module_scrap_code.activity;
 
 
 import android.app.Activity;
@@ -36,16 +36,17 @@ import com.nti.lib_common.constants.ARouterPath;
 import com.nti.lib_common.constants.BusinessType;
 import com.nti.lib_common.utils.DeviceUtils;
 import com.nti.lib_common.view.BarcodeListPopup;
-import com.nti.module_scrap.R;
-import com.nti.module_scrap.adapter.ScrapDetailAdapter;
 
-import com.nti.module_scrap.bean.ScrapCodeBarcode;
-import com.nti.module_scrap.bean.ScrapCodeDetail;
+import com.nti.module_scrap_code.R;
+import com.nti.module_scrap_code.adapter.ScrapDetailAdapter;
 
-import com.nti.module_scrap.bean.ScrapCodeOrderInfo;
-import com.nti.module_scrap.databinding.ActivityScrapDetailBinding;
+import com.nti.module_scrap_code.bean.ScrapCodeBarcode;
+import com.nti.module_scrap_code.bean.ScrapCodeDetail;
 
-import com.nti.module_scrap.viewmodel.ScrapCodeViewModel;
+import com.nti.module_scrap_code.bean.ScrapCodeOrderInfo;
+
+import com.nti.module_scrap_code.databinding.ActivityScrapCodeDetailBinding;
+import com.nti.module_scrap_code.viewmodel.ScrapCodeViewModel;
 import com.xuexiang.xaop.annotation.IOThread;
 import com.xuexiang.xaop.annotation.Permission;
 import com.xuexiang.xaop.consts.PermissionConsts;
@@ -68,7 +69,7 @@ import java.util.List;
 @Route(path = ARouterPath.SCRAP_CODE_DETAIL_PATH)
 public class ScrapCodeDetailActivity extends BaseActivity implements View.OnClickListener{
 
-    private ActivityScrapDetailBinding binding;
+    private ActivityScrapCodeDetailBinding binding;
     private ScrapDetailAdapter adapter;
     private List<ScrapCodeDetail> detailList = new ArrayList<>();
     private List<ScrapCodeDetail> detailList2 = new ArrayList<>();
@@ -93,7 +94,7 @@ public class ScrapCodeDetailActivity extends BaseActivity implements View.OnClic
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_scrap_detail);
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_scrap_code_detail);
         EventBus.getDefault().register(this);
         initSound();
         ARouter.getInstance().inject(this);

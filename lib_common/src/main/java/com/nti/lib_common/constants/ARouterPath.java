@@ -38,9 +38,9 @@ public class ARouterPath {
     public static final String SCRAPDETAIL_PATH = "/scrap/ScrapDetailActivity";
 
     //工业出入库报废补码主页
-    public static final String SCRAP_CODE_PATH = "/scrap/ScrapActivity";
+    public static final String SCRAP_CODE_PATH = "/scrap_code/ScrapCodeActivity";
     //工业出入库报废补码详情
-    public static final String SCRAP_CODE_DETAIL_PATH = "/scrap/ScrapDetailActivity";
+    public static final String SCRAP_CODE_DETAIL_PATH = "/scrap_code/ScrapCodeDetailActivity";
 
     //工业仓库损溢
     public static final String LOSS_PAT = "/loss/LossActivity";

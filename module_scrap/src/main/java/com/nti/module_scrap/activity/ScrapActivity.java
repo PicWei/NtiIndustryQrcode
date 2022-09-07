@@ -70,7 +70,6 @@ public class ScrapActivity extends BaseActivity implements View.OnClickListener 
         viewModel.PDA_H(paramer).observe(this, new Observer<List<ScrapOrderInfo>>() {
             @Override
             public void onChanged(List<ScrapOrderInfo> ScrapOrderInfos) {
-                Log.i("TAG", "ScrapOrderInfos:" + ScrapOrderInfos.toString());
                 loadingPopup.dismiss();
                 if (ScrapOrderInfos == null){
                     Toast.makeText(ScrapActivity.this, "数据为空", Toast.LENGTH_SHORT).show();

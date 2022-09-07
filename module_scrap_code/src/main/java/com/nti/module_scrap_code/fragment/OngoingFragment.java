@@ -1,4 +1,4 @@
-package com.nti.module_scrap.fragment;
+package com.nti.module_scrap_code.fragment;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -11,9 +11,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.alibaba.android.arouter.launcher.ARouter;
 import com.nti.lib_common.constants.ARouterPath;
-import com.nti.module_scrap.R;
-import com.nti.module_scrap.adapter.OngoingAdapter;
-import com.nti.module_scrap.bean.ScrapOrderInfo;
+import com.nti.module_scrap_code.R;
+import com.nti.module_scrap_code.adapter.OngoingAdapter;
+import com.nti.module_scrap_code.bean.ScrapCodeOrderInfo;
 
 import org.litepal.LitePal;
 
@@ -42,12 +42,12 @@ public class OngoingFragment extends Fragment {
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(layoutManager);
-        List<ScrapOrderInfo> orderInfos = LitePal.where("BB_STATE = ?", "1").find(ScrapOrderInfo.class);
+        List<ScrapCodeOrderInfo> orderInfos = LitePal.where("BB_STATE = ?", "1").find(ScrapCodeOrderInfo.class);
         adapter = new OngoingAdapter(getActivity(), orderInfos);
         recyclerView.setAdapter(adapter);
         adapter.setOnItemClickListener(new OngoingAdapter.OnItemClickListener() {
             @Override
-            public void onItemClick(ScrapOrderInfo orderInfo) {
+            public void onItemClick(ScrapCodeOrderInfo orderInfo) {
                 String uuid = orderInfo.getBB_UUID();
                 String BB_CONTRACT_NO = orderInfo.getBB_CONTRACT_NO();
                 String BB_FLOW_NAME = orderInfo.getBB_FLOW_NAME();

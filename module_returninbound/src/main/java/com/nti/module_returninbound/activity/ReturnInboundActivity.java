@@ -71,7 +71,6 @@ public class ReturnInboundActivity extends BaseActivity implements View.OnClickL
         viewModel.PDA_H(paramer).observe(this, new Observer<List<ReturnInboundOrderInfo>>() {
             @Override
             public void onChanged(List<ReturnInboundOrderInfo> returnInboundOrderInfos) {
-                Log.i("TAG", "returnInboundOrderInfos:" + returnInboundOrderInfos.toString());
                 loadingPopup.dismiss();
                 if (returnInboundOrderInfos == null){
                     Toast.makeText(ReturnInboundActivity.this, "数据为空", Toast.LENGTH_SHORT).show();

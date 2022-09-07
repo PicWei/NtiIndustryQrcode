@@ -1,4 +1,4 @@
-package com.nti.module_scrap;
+package com.nti.module_scrap_code;
 
 import org.junit.Test;
 

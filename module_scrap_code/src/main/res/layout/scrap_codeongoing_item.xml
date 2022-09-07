@@ -4,7 +4,7 @@
     <data>
         <variable
             name="bean"
-            type="com.nti.module_scrap.bean.ScrapCodeOrderInfo" />
+            type="com.nti.module_scrap_code.bean.ScrapCodeOrderInfo" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"

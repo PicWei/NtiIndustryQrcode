@@ -1,4 +1,4 @@
-package com.nti.module_scrap.fragment;
+package com.nti.module_scrap_code.fragment;
 
 import android.content.ContentValues;
 import android.os.Bundle;
@@ -10,7 +10,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -19,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.alibaba.android.arouter.launcher.ARouter;
 import com.google.gson.JsonObject;
+import com.nti.lib_common.bean.DataResult;
 import com.nti.lib_common.bean.SalesBarcodeParamer;
 import com.nti.lib_common.bean.SalesOrderParamer;
 import com.nti.lib_common.bean.SellBarcodeReciveParamer;
@@ -26,12 +26,13 @@ import com.nti.lib_common.bean.SellParamer;
 import com.nti.lib_common.bean.UploadSellParamer;
 import com.nti.lib_common.constants.ARouterPath;
 import com.nti.lib_common.viewmodel.SellBarcodeReciveViewModel;
-import com.nti.module_scrap.R;
-import com.nti.module_scrap.adapter.CompletedAdapter;
-import com.nti.module_scrap.bean.ScrapBarcode;
-import com.nti.module_scrap.bean.ScrapDetail;
-import com.nti.module_scrap.bean.ScrapOrderInfo;
-import com.nti.module_scrap.databinding.FragmentCompletedBinding;
+import com.nti.module_scrap_code.R;
+
+
+import com.nti.module_scrap_code.adapter.CompletedAdapter;
+import com.nti.module_scrap_code.bean.ScrapCodeBarcode;
+import com.nti.module_scrap_code.bean.ScrapCodeDetail;
+import com.nti.module_scrap_code.bean.ScrapCodeOrderInfo;
 import com.ruffian.library.widget.RTextView;
 
 import org.litepal.LitePal;
@@ -46,7 +47,7 @@ public class CompletedFragment extends Fragment {
     private CompletedAdapter adapter;
     private boolean ispressed;
     private List<String> uuids = new ArrayList<>();
-    private List<ScrapOrderInfo> orderInfos = new ArrayList<>();
+    private List<ScrapCodeOrderInfo> orderInfos = new ArrayList<>();
     private SellBarcodeReciveViewModel viewModel;
     private RelativeLayout selectAllRl;
     private RTextView submitBtn;
@@ -77,16 +78,16 @@ public class CompletedFragment extends Fragment {
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(layoutManager);
-        orderInfos = LitePal.where("BB_STATE = ?", "3").find(ScrapOrderInfo.class);
+        orderInfos = LitePal.where("BB_STATE = ?", "3").find(ScrapCodeOrderInfo.class);
         for (int i = 0; i < orderInfos.size(); i++){
-            ScrapOrderInfo orderInfo = orderInfos.get(i);
+            ScrapCodeOrderInfo orderInfo = orderInfos.get(i);
             orderInfo.setIspressed(false);
         }
         adapter = new CompletedAdapter(getActivity(), orderInfos);
         recyclerView.setAdapter(adapter);
         adapter.setOnItemClickListener(new CompletedAdapter.OnItemClickListener() {
             @Override
-            public void onItemClick(ScrapOrderInfo orderInfo) {
+            public void onItemClick(ScrapCodeOrderInfo orderInfo) {
                 String uuid = orderInfo.getBB_UUID();
                 String BB_CONTRACT_NO = orderInfo.getBB_CONTRACT_NO();
                 String BB_FLOW_NAME = orderInfo.getBB_FLOW_NAME();
@@ -99,9 +100,9 @@ public class CompletedFragment extends Fragment {
         });
         adapter.setOnCheckListener(new CompletedAdapter.onCheckListener() {
             @Override
-            public void onCheckChange(List<ScrapOrderInfo> orderInfos) {
+            public void onCheckChange(List<ScrapCodeOrderInfo> orderInfos) {
                 uuids.clear();
-                for (ScrapOrderInfo orderInfo : orderInfos){
+                for (ScrapCodeOrderInfo orderInfo : orderInfos){
                     if (orderInfo.isIspressed()){
                         uuids.add(orderInfo.getBB_UUID());
                     }
@@ -125,7 +126,7 @@ public class CompletedFragment extends Fragment {
                 if (ispressed){
                     radioBtn.setImageResource(R.mipmap.radio_normal);
                     ispressed = false;
-                    for (ScrapOrderInfo orderInfo : orderInfos){
+                    for (ScrapCodeOrderInfo orderInfo : orderInfos){
                         orderInfo.setIspressed(false);
                         uuids.clear();
                     }
@@ -136,7 +137,7 @@ public class CompletedFragment extends Fragment {
                     radioBtn.setImageResource(R.mipmap.radion_pressed);
                     ispressed = true;
                     uuids.clear();
-                    for (ScrapOrderInfo orderInfo : orderInfos){
+                    for (ScrapCodeOrderInfo orderInfo : orderInfos){
                         orderInfo.setIspressed(true);
                         uuids.add(orderInfo.getBB_UUID());
                     }
@@ -150,19 +151,19 @@ public class CompletedFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 List<SellParamer> sellParamers = new ArrayList<>();
-                for (ScrapOrderInfo orderInfo : orderInfos){
+                for (ScrapCodeOrderInfo orderInfo : orderInfos){
                     if (orderInfo.isIspressed()){
                         String uuid = orderInfo.getBB_UUID();
                         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                         String BI_FEEDBACK_TIME = format.format(new Date());
-                        List<ScrapDetail> details = LitePal.where("BD_BB_UUID = ?", uuid).find(ScrapDetail.class);
+                        List<ScrapCodeDetail> details = LitePal.where("BD_BB_UUID = ?", uuid).find(ScrapCodeDetail.class);
                         List<SalesOrderParamer> paramers = new ArrayList<>();
                         for (int i = 0; i < details.size(); i++){
                             String pcigcode = details.get(i).getBD_PCIG_CODE();
                             String pnum = details.get(i).getBD_BILL_PNUM();
                             String snum = details.get(i).getBD_SCAN_NUM();
                             List<SalesBarcodeParamer> salesBarcodeParamers = new ArrayList<>();
-                            List<ScrapBarcode> barcodes = LitePal.where("UUID = ? and pcigcode = ? and isSubmit = 0", uuid, pcigcode).find(ScrapBarcode.class);
+                            List<ScrapCodeBarcode> barcodes = LitePal.where("UUID = ? and pcigcode = ? and isSubmit = 0", uuid, pcigcode).find(ScrapCodeBarcode.class);
                             if (barcodes.size() > 0){
                                 for (int j = 0; j < barcodes.size(); j++){
                                     String barcode = barcodes.get(j).getBarcode();
@@ -190,37 +191,37 @@ public class CompletedFragment extends Fragment {
                 String SYSTEM_SERV = "INDUT_OUT_SCRAP";
                 UploadSellParamer uploadSellParamer = new UploadSellParamer(sellParamers, SYSTEM_SERV);
                 SellBarcodeReciveParamer paramer = new SellBarcodeReciveParamer(uploadSellParamer);
-                viewModel.sellBarcodeRecive(paramer).observe(getActivity(), new Observer<JsonObject>() {
+                viewModel.sellBarcodeRecive(paramer).observe(getActivity(), new Observer<DataResult<JsonObject>>() {
                     @Override
-                    public void onChanged(JsonObject jsonObject) {
-                        if (jsonObject == null){
-                            Toast.makeText(getActivity(), "网络异常", Toast.LENGTH_SHORT).show();
-                        }else {
-                            String code = jsonObject.get("code").toString().replace("\"", "");
-                            String message = jsonObject.get("message").toString().replace("\"", "");
-                            if (code.equals("200")){
-                                ContentValues cv = new ContentValues();
-                                cv.put("isSubmit", true);
-                                for (int i = 0; i < uuids.size(); i++){
-                                    String uuid = uuids.get(i);
-                                    LitePal.updateAll(ScrapBarcode.class, cv, "UUID = ?", uuid);
-                                    List<ScrapOrderInfo> salesFactoryOrderInfos = LitePal.where("BB_UUID = ?", uuid).find(ScrapOrderInfo.class);
-                                    List<ScrapBarcode> barcodes = LitePal.where("UUID = ?", uuid).find(ScrapBarcode.class);
-                                    int size = barcodes.size();
-                                    String totalNum = salesFactoryOrderInfos.get(0).getBB_TOTAL_PNUM();
-                                    String scanNum = salesFactoryOrderInfos.get(0).getBB_TOTAL_SCAN_NUM();
-                                    int mTotalNum = Integer.valueOf(totalNum);
-                                    int mScanNum = Integer.valueOf(scanNum);
-                                    if (mTotalNum == (size + mScanNum)){
-                                        LitePal.deleteAll(ScrapBarcode.class, "BB_UUID = ?", uuid);
-                                    }
-                                }
-                                Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
-                            }else {
-                                Toast.makeText(getActivity(), R.string.sumbit_expection, Toast.LENGTH_SHORT).show();
-                            }
-
-                        }
+                    public void onChanged(DataResult<JsonObject> dataResult) {
+//                        if (jsonObject == null){
+//                            Toast.makeText(getActivity(), "网络异常", Toast.LENGTH_SHORT).show();
+//                        }else {
+//                            String code = jsonObject.get("code").toString().replace("\"", "");
+//                            String message = jsonObject.get("message").toString().replace("\"", "");
+//                            if (code.equals("200")){
+//                                ContentValues cv = new ContentValues();
+//                                cv.put("isSubmit", true);
+//                                for (int i = 0; i < uuids.size(); i++){
+//                                    String uuid = uuids.get(i);
+//                                    LitePal.updateAll(ScrapCodeBarcode.class, cv, "UUID = ?", uuid);
+//                                    List<ScrapCodeOrderInfo> salesFactoryOrderInfos = LitePal.where("BB_UUID = ?", uuid).find(ScrapCodeOrderInfo.class);
+//                                    List<ScrapCodeBarcode> barcodes = LitePal.where("UUID = ?", uuid).find(ScrapCodeBarcode.class);
+//                                    int size = barcodes.size();
+//                                    String totalNum = salesFactoryOrderInfos.get(0).getBB_TOTAL_PNUM();
+//                                    String scanNum = salesFactoryOrderInfos.get(0).getBB_TOTAL_SCAN_NUM();
+//                                    int mTotalNum = Integer.valueOf(totalNum);
+//                                    int mScanNum = Integer.valueOf(scanNum);
+//                                    if (mTotalNum == (size + mScanNum)){
+//                                        LitePal.deleteAll(ScrapCodeBarcode.class, "BB_UUID = ?", uuid);
+//                                    }
+//                                }
+//                                Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
+//                            }else {
+//                                Toast.makeText(getActivity(), R.string.sumbit_expection, Toast.LENGTH_SHORT).show();
+//                            }
+//
+//                        }
                     }
                 });
 

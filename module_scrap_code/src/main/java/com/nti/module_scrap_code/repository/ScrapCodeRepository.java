@@ -1,4 +1,4 @@
-package com.nti.module_scrap.repository;
+package com.nti.module_scrap_code.repository;
 
 import android.text.TextUtils;
 
@@ -10,10 +10,11 @@ import com.nti.lib_common.bean.ErrorSignReceiveParamer;
 import com.nti.lib_common.bean.Paramer;
 import com.nti.lib_common.bean.UpParamer;
 import com.nti.lib_common.utils.HttpUtils;
-import com.nti.module_scrap.bean.ScrapCodeBarcode;
-import com.nti.module_scrap.bean.ScrapCodeDetail;
-import com.nti.module_scrap.bean.ScrapCodeOrderInfo;
 import com.nti.module_scrap.service.IScrapCodeService;
+import com.nti.module_scrap_code.bean.ScrapCodeBarcode;
+import com.nti.module_scrap_code.bean.ScrapCodeDetail;
+import com.nti.module_scrap_code.bean.ScrapCodeOrderInfo;
+
 
 
 import org.jetbrains.annotations.NotNull;

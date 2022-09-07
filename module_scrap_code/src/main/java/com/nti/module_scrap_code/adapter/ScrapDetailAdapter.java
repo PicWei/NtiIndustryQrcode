@@ -1,4 +1,4 @@
-package com.nti.module_scrap.adapter;
+package com.nti.module_scrap_code.adapter;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -10,10 +10,10 @@ import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.nti.module_scrap.R;
+import com.nti.module_scrap_code.R;
+import com.nti.module_scrap_code.bean.ScrapCodeDetail;
+import com.nti.module_scrap_code.databinding.ScrapCodeDetailItemBinding;
 
-import com.nti.module_scrap.bean.ScrapCodeDetail;
-import com.nti.module_scrap.databinding.ScrapdetailItemBinding;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -45,7 +45,7 @@ public class ScrapDetailAdapter extends RecyclerView.Adapter<ScrapDetailAdapter.
     @NotNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull @NotNull ViewGroup parent, int viewType) {
-        ScrapdetailItemBinding binding = DataBindingUtil.inflate(inflater, R.layout.scrapdetail_item, parent, false);
+        ScrapCodeDetailItemBinding binding = DataBindingUtil.inflate(inflater, R.layout.scrap_code_detail_item, parent, false);
         return new ViewHolder(binding);
     }
 
@@ -87,9 +87,9 @@ public class ScrapDetailAdapter extends RecyclerView.Adapter<ScrapDetailAdapter.
     }
 
     class ViewHolder extends RecyclerView.ViewHolder{
-        ScrapdetailItemBinding binding;
+        ScrapCodeDetailItemBinding binding;
 
-        public ViewHolder(ScrapdetailItemBinding binding) {
+        public ViewHolder(ScrapCodeDetailItemBinding binding) {
             super(binding.getRoot());
             this.binding = binding;
         }

@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout>
+
     <data>
         <variable
             name="bean"
-            type="com.nti.module_scrap.bean.ScrapCodeOrderInfo" />
+            type="com.nti.module_scrap_code.bean.ScrapCodeOrderInfo" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -12,7 +13,7 @@
         xmlns:app="http://schemas.android.com/apk/res-auto">
         <com.ruffian.library.widget.RConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="180dp"
+            android:layout_height="148dp"
             app:layout_constraintTop_toTopOf="parent"
             app:corner_radius="5dp"
             app:shadow_color="#333581ee"
@@ -23,6 +24,17 @@
                 android:id="@+id/head"
                 android:layout_width="match_parent"
                 android:layout_height="43dp">
+                <ImageView
+                    android:id="@+id/checkbox"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@mipmap/radio_normal"
+                    android:scaleType="fitXY"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:layout_marginLeft="10dp"
+                    app:layout_constraintRight_toLeftOf="@+id/bill_label"
+                    app:layout_constraintLeft_toLeftOf="parent"/>
                 <TextView
                     android:id="@+id/bill_label"
                     android:layout_width="wrap_content"
@@ -30,10 +42,10 @@
                     android:text="票号:"
                     android:gravity="center"
                     android:textSize="16sp"
-                    android:layout_marginLeft="15dp"
+                    android:layout_marginLeft="10dp"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintLeft_toLeftOf="parent"/>
+                    app:layout_constraintLeft_toRightOf="@+id/checkbox"/>
                 <TextView
                     android:id="@+id/bill_tv"
                     android:layout_width="0dp"
@@ -71,7 +83,7 @@
                 android:gravity="left|center"
                 app:layout_constraintTop_toBottomOf="@+id/view"
                 app:layout_constraintLeft_toRightOf="@+id/outflow_label"
-                app:layout_constraintRight_toLeftOf="@+id/num_tv"
+                app:layout_constraintRight_toRightOf="parent"
                 android:layout_marginRight="10dp"
                 android:text="@{bean.B_NAME}"/>
             <TextView
@@ -95,63 +107,29 @@
                 android:text="@{bean.BB_FLOW_NAME}"
                 app:layout_constraintTop_toBottomOf="@+id/outflow_tv"
                 app:layout_constraintLeft_toRightOf="@+id/inflow_label"
-                app:layout_constraintRight_toLeftOf="@+id/num_tv"
+                app:layout_constraintRight_toRightOf="parent"
                 android:layout_marginRight="10dp"/>
 
-            <TextView
-                android:id="@+id/num_tv"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="24sp"
-                android:textColor="#ffed3e33"
-                android:text="@{bean.BB_TOTAL_PNUM}"
-                app:layout_constraintTop_toBottomOf="@+id/view"
-                android:layout_marginTop="14dp"
-                app:layout_constraintRight_toRightOf="parent"
-                android:layout_marginRight="33dp"/>
-            <TextView
-                android:id="@+id/num_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="应扫描量"
-                android:textColor="#ff999999"
-                android:textSize="16sp"
-                app:layout_constraintTop_toBottomOf="@+id/num_tv"
-                app:layout_constraintRight_toRightOf="parent"
-                android:layout_marginRight="18dp"
-                app:layout_constraintBottom_toBottomOf="@+id/inflow_tv"
-                app:layout_constraintTop_toTopOf="@+id/inflow_tv"/>
-
-            <com.ruffian.library.widget.RConstraintLayout
-                android:id="@+id/scan_btn"
-                android:layout_width="220dp"
-                android:layout_height="36dp"
-                app:layout_constraintBottom_toBottomOf="parent"
+            <ProgressBar
+                android:id="@+id/progressbar"
+                android:layout_width="200dp"
+                android:layout_height="8dp"
+                style="@style/progressbarStyle_Horizontal"
                 app:layout_constraintTop_toBottomOf="@+id/inflow_label"
                 app:layout_constraintLeft_toLeftOf="parent"
+                android:layout_marginLeft="16dp"
+                android:layout_marginTop="10dp"/>
+
+            <TextView
+                android:id="@+id/progressbar_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@+id/inflow_tv"
                 app:layout_constraintRight_toRightOf="parent"
-                app:corner_radius="5dp"
-                app:background_normal="#ff0083f5">
-                <ImageView
-                    android:id="@+id/scan_iv"
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    android:layout_marginLeft="70dp"
-                    android:src="@mipmap/scan"/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="开始扫描"
-                    android:textSize="14sp"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    android:textColor="@color/white"
-                    app:layout_constraintLeft_toRightOf="@+id/scan_iv"
-                    android:layout_marginLeft="2dp"/>
-            </com.ruffian.library.widget.RConstraintLayout>
+                android:layout_marginRight="30dp"
+                android:text="1111/1112"
+                android:layout_marginTop="3dp"/>
+
         </com.ruffian.library.widget.RConstraintLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

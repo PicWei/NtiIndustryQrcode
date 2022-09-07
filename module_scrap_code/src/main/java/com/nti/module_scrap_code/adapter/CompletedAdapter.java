@@ -1,4 +1,4 @@
-package com.nti.module_scrap.adapter;
+package com.nti.module_scrap_code.adapter;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -9,10 +9,10 @@ import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.nti.module_scrap.R;
+import com.nti.module_scrap_code.R;
+import com.nti.module_scrap_code.databinding.ScrapCodeCompletedItemBinding;
+import com.nti.module_scrap_code.bean.ScrapCodeOrderInfo;
 
-import com.nti.module_scrap.bean.ScrapCodeOrderInfo;
-import com.nti.module_scrap.databinding.ScrapcompletedItemBinding;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -49,7 +49,7 @@ public class CompletedAdapter extends RecyclerView.Adapter<CompletedAdapter.View
     @NotNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull @NotNull ViewGroup parent, int viewType) {
-        ScrapcompletedItemBinding binding = DataBindingUtil.inflate(inflater, R.layout.scrapcompleted_item, parent, false);
+        ScrapCodeCompletedItemBinding binding = DataBindingUtil.inflate(inflater, R.layout.scrap_code_completed_item, parent, false);
         return new ViewHolder(binding);
     }
 
@@ -96,9 +96,9 @@ public class CompletedAdapter extends RecyclerView.Adapter<CompletedAdapter.View
     }
 
     class ViewHolder extends RecyclerView.ViewHolder{
-        ScrapcompletedItemBinding binding;
+        ScrapCodeCompletedItemBinding binding;
 
-        public ViewHolder(ScrapcompletedItemBinding binding) {
+        public ViewHolder(ScrapCodeCompletedItemBinding binding) {
             super(binding.getRoot());
             this.binding = binding;
         }

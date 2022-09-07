@@ -53,6 +53,7 @@ dependencies {
     implementation project(path: ':module_produceinbound')
     implementation project(path: ':module_produceoutbound')
     implementation project(path: ':module_scrap')
+    implementation project(path: ':module_scrap_code')
     implementation project(path: ':module_loss')
     implementation project(path: ':module_version')
     implementation 'androidx.appcompat:appcompat:1.2.0'

@@ -1,4 +1,4 @@
-package com.nti.module_scrap.bean;
+package com.nti.module_scrap_code.bean;
 
 import org.litepal.crud.LitePalSupport;
 

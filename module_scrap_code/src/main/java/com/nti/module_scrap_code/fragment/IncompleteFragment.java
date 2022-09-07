@@ -1,4 +1,4 @@
-package com.nti.module_scrap.fragment;
+package com.nti.module_scrap_code.fragment;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -19,10 +19,12 @@ import com.nti.lib_common.bean.UpParamer;
 import com.nti.lib_common.bean.UpdataStatuesParamer;
 import com.nti.lib_common.constants.ARouterPath;
 import com.nti.lib_common.constants.BusinessType;
-import com.nti.module_scrap.R;
-import com.nti.module_scrap.adapter.IncompleteAdapter;
-import com.nti.module_scrap.bean.ScrapOrderInfo;
-import com.nti.module_scrap.viewmodel.ScrapViewModel;
+import com.nti.module_scrap_code.R;
+
+import com.nti.module_scrap_code.adapter.IncompleteAdapter;
+import com.nti.module_scrap_code.bean.ScrapCodeOrderInfo;
+import com.nti.module_scrap_code.viewmodel.ScrapCodeViewModel;
+
 
 import org.greenrobot.eventbus.EventBus;
 import org.litepal.LitePal;
@@ -32,7 +34,7 @@ import java.util.List;
 public class IncompleteFragment extends Fragment {
 
     private RecyclerView recyclerView;
-    private ScrapViewModel viewModel;
+    private ScrapCodeViewModel viewModel;
     private IncompleteAdapter adapter;
 
     public static IncompleteFragment newInstance() {
@@ -50,16 +52,16 @@ public class IncompleteFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_incomplete, container, false);
         recyclerView = view.findViewById(R.id.recyclerView);
-        viewModel = new ViewModelProvider(this).get(ScrapViewModel.class);
+        viewModel = new ViewModelProvider(this).get(ScrapCodeViewModel.class);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(layoutManager);
-        List<ScrapOrderInfo> orderInfos = LitePal.where("BB_STATE = ?", "4").find(ScrapOrderInfo.class);
+        List<ScrapCodeOrderInfo> orderInfos = LitePal.where("BB_STATE = ?", "4").find(ScrapCodeOrderInfo.class);
         adapter = new IncompleteAdapter(getActivity(), orderInfos);
         recyclerView.setAdapter(adapter);
         adapter.setOnItemClickListener(new IncompleteAdapter.OnItemClickListener() {
             @Override
-            public void onItemClick(ScrapOrderInfo orderInfo) {
+            public void onItemClick(ScrapCodeOrderInfo orderInfo) {
                 String uuid = orderInfo.getBB_UUID();
                 String BB_CONTRACT_NO = orderInfo.getBB_CONTRACT_NO();
                 String BB_FLOW_NAME = orderInfo.getBB_FLOW_NAME();

@@ -14,7 +14,7 @@
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:title="工业出入库报废"
+            app:title="报废补码业务"
             app:is_refresh_visible="true"
             app:is_right_visible="true"
             app:right_title="刷新"/>

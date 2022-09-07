@@ -1,4 +1,4 @@
-package com.nti.module_scrap.viewmodel;
+package com.nti.module_scrap_code.viewmodel;
 
 import android.app.Application;
 
@@ -11,8 +11,8 @@ import com.google.gson.JsonObject;
 import com.nti.lib_common.bean.ErrorSignReceiveParamer;
 import com.nti.lib_common.bean.Paramer;
 import com.nti.lib_common.bean.UpParamer;
-import com.nti.module_scrap.bean.ScrapCodeOrderInfo;
-import com.nti.module_scrap.repository.ScrapCodeRepository;
+import com.nti.module_scrap_code.bean.ScrapCodeOrderInfo;
+import com.nti.module_scrap_code.repository.ScrapCodeRepository;
 
 
 import org.jetbrains.annotations.NotNull;
