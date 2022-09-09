@@ -30,6 +30,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
             case R.id.rl_login:
                 Intent intent = new Intent(this, MainActivity.class);
                 startActivity(intent);
+                finish();
                 break;
             case R.id.setting:
                 ARouter.getInstance().build(ARouterPath.DEVICE_PATH)

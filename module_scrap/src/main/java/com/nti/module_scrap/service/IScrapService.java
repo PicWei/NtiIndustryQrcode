@@ -3,6 +3,7 @@ package com.nti.module_scrap.service;
 import com.google.gson.JsonObject;
 import com.nti.lib_common.bean.ErrorSignReceiveParamer;
 import com.nti.lib_common.bean.Paramer;
+import com.nti.lib_common.bean.SearchCodeParamer;
 import com.nti.lib_common.bean.UpParamer;
 
 import io.reactivex.Observable;
@@ -23,4 +24,7 @@ public interface IScrapService {
 
     @POST("/api/fdevelop/tool/front/runtime-server/common/transflow/executeCode/INDUT_UNIFIED_ERROR_BARCODE")
     Observable<JsonObject> errorSignReceive(@Body ErrorSignReceiveParamer paramer);
+
+    @POST("/api/fdevelop/tool/front/runtime-server/common/transflow/executeCode/INDUT_SEARCH_CODE")
+    Observable<JsonObject> searchCode(@Body SearchCodeParamer paramer);
 }
