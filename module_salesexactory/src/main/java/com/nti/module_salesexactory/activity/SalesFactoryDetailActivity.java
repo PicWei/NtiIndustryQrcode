@@ -400,7 +400,6 @@ public class SalesFactoryDetailActivity extends BaseActivity implements View.OnC
                                 viewModel3.sellBarcodeRecive(paramer).observe(this, new Observer<DataResult<JsonObject>>() {
                                     @Override
                                     public void onChanged(DataResult<JsonObject> dataResult) {
-                                        Log.i("TAG", "dataResult:" + dataResult.toString());
                                         int errcode = dataResult.getErrcode();
                                         if (errcode == 0){
                                             JsonObject jsonObject = dataResult.getT();

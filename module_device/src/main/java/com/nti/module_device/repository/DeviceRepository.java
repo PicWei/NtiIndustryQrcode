@@ -5,6 +5,7 @@ import android.util.Log;
 import androidx.lifecycle.MutableLiveData;
 
 import com.google.gson.JsonObject;
+import com.nti.lib_common.bean.DataResult;
 import com.nti.lib_common.utils.HttpUtils;
 import com.nti.module_device.bean.PdaRegisterParamer;
 import com.nti.module_device.service.IDeviceServie;
@@ -22,8 +23,8 @@ import io.reactivex.schedulers.Schedulers;
  * @describe
  */
 public class DeviceRepository {
-    public MutableLiveData<JsonObject> register (PdaRegisterParamer paramer){
-        final MutableLiveData<JsonObject> data = new MutableLiveData<>();
+    public MutableLiveData<DataResult<JsonObject>> register (PdaRegisterParamer paramer){
+        final MutableLiveData<DataResult<JsonObject>> data = new MutableLiveData<>();
         HttpUtils.getInstance().with(IDeviceServie.class).register(paramer)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -35,12 +36,13 @@ public class DeviceRepository {
 
                     @Override
                     public void onNext(@NotNull JsonObject jsonObject) {
-                        data.setValue(jsonObject);
+                        DataResult<JsonObject> dataResult = new DataResult<JsonObject>(0, jsonObject);
+                        data.setValue(dataResult);
                     }
 
                     @Override
                     public void onError(@NotNull Throwable e) {
-                        Log.i("TAG", "e:"+ e.getMessage());
+                        DataResult<JsonObject> dataResult = new DataResult<JsonObject>(-1, null);
                         data.setValue(null);
                     }
 
