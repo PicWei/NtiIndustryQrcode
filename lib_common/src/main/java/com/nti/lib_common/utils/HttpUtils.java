@@ -55,25 +55,25 @@ public class HttpUtils {
     public Retrofit buildRetrofit() {
         Retrofit retrofit = null;
         OkHttpClient.Builder mBuilder = null;
-        /*HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
-        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);*/
+        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
+        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
         try {
             SSLContext sslContext = SSLContext.getInstance("SSL");
             sslContext.init(null, new TrustManager[]{trustManager}, new SecureRandom());
             mBuilder = new OkHttpClient.Builder()
                     .connectTimeout(30, TimeUnit.SECONDS)
                     .writeTimeout(30, TimeUnit.SECONDS)
-                    .readTimeout(30, TimeUnit.SECONDS);
-                    /*.connectionSpecs(Arrays.asList(ConnectionSpec.MODERN_TLS, ConnectionSpec.COMPATIBLE_TLS))
+                    .readTimeout(30, TimeUnit.SECONDS)
+                    .connectionSpecs(Arrays.asList(ConnectionSpec.MODERN_TLS, ConnectionSpec.COMPATIBLE_TLS))
                     .sslSocketFactory(sslContext.getSocketFactory(), trustManager)
-                    .hostnameVerifier((s, sslSession) -> true);*/
+                    .hostnameVerifier((s, sslSession) -> true);
 
             retrofit = new Retrofit.Builder()
                     .client(mBuilder.build())
                     .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                     .addConverterFactory(GsonConverterFactory.create())
-       //             .baseUrl("https://it.nti56.com").build();
-                    .baseUrl("http://10.1.20.166:10012").build();
+                    .baseUrl("https://it.nti56.com").build();
+       //             .baseUrl("http://10.1.20.166:10012").build();
         }catch (Exception e){
             e.printStackTrace();
         }
