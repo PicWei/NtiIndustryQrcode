@@ -292,29 +292,34 @@ public class SalesFactoryDetailActivity extends BaseActivity implements View.OnC
                     String result = bundle.getString(XQRCode.RESULT_DATA);
                     if (result.length() != 32){
                         playSound(2);
+                        sendErrorCode(result);
                         Toast.makeText(this, "条码格式错误", Toast.LENGTH_LONG).show();
                         return;
                     }else {
                         if (!result.startsWith("91")){
                             playSound(2);
+                            sendErrorCode(result);
                             Toast.makeText(this, "条码格式错误", Toast.LENGTH_LONG).show();
                             return;
                         }
                         String type = result.substring(22, 23);
                         if (!type.equals("1") && !type.equals("2") && !type.equals("3") && !type.equals("4")){
                             playSound(2);
+                            sendErrorCode(result);
                             Toast.makeText(this, "条码经营方式未知", Toast.LENGTH_LONG).show();
                             return;
                         }
                         String date = result.substring(16, 22);
                         if (!DateUtil.isValidDate(date)){
                             playSound(2);
+                            sendErrorCode(result);
                             Toast.makeText(this, "条码日期无效", Toast.LENGTH_LONG).show();
                             return;
                         }
                         String unitcode = result.substring(8, 16);
                         if (!unitcode.equals(A_NO)){
                             playSound(2);
+                            sendErrorCode(result);
                             Toast.makeText(this, "生产厂家与当前单位不一致", Toast.LENGTH_LONG).show();
                             return;
                         }
@@ -323,7 +328,7 @@ public class SalesFactoryDetailActivity extends BaseActivity implements View.OnC
                         List<SalesOrderParamer> paramers = new ArrayList<>();
                         if (barcodes.size() > 0){
                             playSound(2);
-                            //             sendErrorCode(result);
+                            sendErrorCode(result);
                             Toast.makeText(this, "此条码已扫过", Toast.LENGTH_LONG).show();
                             return;
                         }
@@ -353,7 +358,7 @@ public class SalesFactoryDetailActivity extends BaseActivity implements View.OnC
                                 }
                                 if (mscanQty > mPlanqty){
                                     playSound(2);
-                                    //                    sendErrorCode(result);
+                                    sendErrorCode(result);
                                     Toast.makeText(this, "扫描量大于计划量,暂停扫描", Toast.LENGTH_SHORT).show();
                                     return;
                                 }
@@ -400,12 +405,13 @@ public class SalesFactoryDetailActivity extends BaseActivity implements View.OnC
                                 viewModel3.sellBarcodeRecive(paramer).observe(this, new Observer<DataResult<JsonObject>>() {
                                     @Override
                                     public void onChanged(DataResult<JsonObject> dataResult) {
+                                        Log.i("TAG", "dataResult:" + dataResult.toString());
                                         int errcode = dataResult.getErrcode();
                                         if (errcode == 0){
                                             JsonObject jsonObject = dataResult.getT();
                                             String code = jsonObject.get("code").toString().replace("\"", "");
                                             String message = jsonObject.get("message").toString().replace("\"", "");
-                                            if (code.equals("200")){
+                                            if (code.equals("0")){
                                                 SalesBarcode salesBarcode = new SalesBarcode(uuid, pcigCode, picgname, result, scantime,scancode);
                                                 salesBarcode.setSubmit(true);
                                                 salesBarcode.saveOrUpdate("barcode = ?", result);
@@ -426,7 +432,7 @@ public class SalesFactoryDetailActivity extends BaseActivity implements View.OnC
                         }
                         if (count == detailList2.size()){
                             playSound(2);
-                            //              sendErrorCode(result);
+                            sendErrorCode(result);
                             Toast.makeText(this, "条码不符", Toast.LENGTH_LONG).show();
                             return;
                         }

@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.nti.lib_common.bean.DataResult;
 import com.nti.lib_common.bean.ErrorSignReceiveParamer;
 import com.nti.lib_common.bean.Paramer;
 import com.nti.lib_common.bean.UpParamer;
@@ -32,8 +33,8 @@ import io.reactivex.schedulers.Schedulers;
  * @describe
  */
 public class LossRepository {
-    public MutableLiveData<List<LossOrderInfo>> PDA_H(Paramer paramer){
-        final MutableLiveData<List<LossOrderInfo>> data = new MutableLiveData<>();
+    public MutableLiveData<DataResult<List<LossOrderInfo>>> PDA_H(Paramer paramer){
+        final MutableLiveData<DataResult<List<LossOrderInfo>>> data = new MutableLiveData<>();
         final List<LossOrderInfo> orderInfos = new ArrayList<>();
         HttpUtils.getInstance().with(ILossService.class).PDA_H(paramer)
                 .subscribeOn(Schedulers.io())
@@ -153,8 +154,10 @@ public class LossRepository {
                                     }
                                     String PDA_SCANNER_IS_END = object.get("PDA_SCANNER_IS_END").toString().replace("\"", "");
                                     String BB_STATE = object.get("BB_STATE").toString().replace("\"", "");
+                                    String A_NO = object.get("A_NO").toString().replace("\"", "");
                                     LossOrderInfo orderInfo = new LossOrderInfo(BB_UUID, BB_CONTRACT_NO, BB_BT_CODE, BB_TICKET_NO, BB_WS_CODE,
                                             BB_RELATE_CONTRACT_NO, B_NAME, BB_INPUT_DATE, BB_TOTAL_ALL_NUM1, BB_TOTAL_SCAN_NUM, BB_TOTAL_PNUM, BB_FLOW_NAME, BB_STATE, PDA_SCANNER_IS_END);
+                                    orderInfo.setA_NO(A_NO);
                                     orderInfos.add(orderInfo);
                                 }catch (Exception e){
                                     e.printStackTrace();
@@ -168,7 +171,9 @@ public class LossRepository {
                         try {
                             LitePal.deleteAll(LossOrderInfo.class);
                             LitePal.saveAll(orderInfos);
-                            data.setValue(orderInfos);
+         //                   data.setValue(orderInfos);
+                            DataResult<List<LossOrderInfo>> dataResult = new DataResult<>(0, orderInfos);
+                            data.setValue(dataResult);
                         }catch (Exception e){
                             e.printStackTrace();
                         }
@@ -177,7 +182,8 @@ public class LossRepository {
 
                     @Override
                     public void onError(@NotNull Throwable e) {
-                        data.setValue(null);
+                        DataResult<List<LossOrderInfo>> dataResult = new DataResult<>(-1, null);
+                        data.setValue(dataResult);
                     }
 
                     @Override

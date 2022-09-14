@@ -14,6 +14,7 @@ import com.alibaba.android.arouter.facade.annotation.Route;
 import com.lxj.xpopup.XPopup;
 import com.lxj.xpopup.impl.LoadingPopupView;
 import com.nti.lib_common.activity.BaseActivity;
+import com.nti.lib_common.bean.DataResult;
 import com.nti.lib_common.bean.MessageEvent;
 import com.nti.lib_common.bean.Paramer;
 import com.nti.lib_common.bean.Params;
@@ -65,23 +66,29 @@ public class LossActivity extends BaseActivity implements View.OnClickListener {
         }else {
             loadingPopup.show();
         }
-        viewModel.PDA_H(paramer).observe(this, new Observer<List<LossOrderInfo>>() {
+        viewModel.PDA_H(paramer).observe(this, new Observer<DataResult<List<LossOrderInfo>>>() {
             @Override
-            public void onChanged(List<LossOrderInfo> returnInboundOrderInfos) {
+            public void onChanged(DataResult<List<LossOrderInfo>> dataResult) {
                 loadingPopup.dismiss();
-                if (returnInboundOrderInfos == null){
-                    Toast.makeText(LossActivity.this, "数据为空", Toast.LENGTH_SHORT).show();
+                int errcode = dataResult.getErrcode();
+                if (errcode == -1){
+                    Toast.makeText(LossActivity.this, "网络异常", Toast.LENGTH_SHORT).show();
                 }else {
-                    binding.incompleteCl.performClick();
-                    List<LossOrderInfo> orderInfos = LitePal.where("BB_STATE = ?", "4").find(LossOrderInfo.class);
-                    List<LossOrderInfo> orderInfos2 = LitePal.where("BB_STATE = ?", "1").find(LossOrderInfo.class);
-                    List<LossOrderInfo> orderInfos3 = LitePal.where("BB_STATE = ? and PDA_SCANNER_IS_END = ?", "3", "0").find(LossOrderInfo.class);
-                    int incompleteNum = orderInfos.size();
-                    int ongoingNum = orderInfos2.size();
-                    int completeNUm = orderInfos3.size();
-                    binding.incompleteNum.setText(incompleteNum+"");
-                    binding.ongoingNum.setText(ongoingNum+"");
-                    binding.completedNum.setText(completeNUm+"");
+                    List<LossOrderInfo> lossOrderInfos = dataResult.getT();
+                    if (lossOrderInfos == null || lossOrderInfos.isEmpty()){
+                        Toast.makeText(LossActivity.this, "数据为空", Toast.LENGTH_SHORT).show();
+                    }else {
+                        binding.incompleteCl.performClick();
+                        List<LossOrderInfo> orderInfos = LitePal.where("BB_STATE = ?", "4").find(LossOrderInfo.class);
+                        List<LossOrderInfo> orderInfos2 = LitePal.where("BB_STATE = ?", "1").find(LossOrderInfo.class);
+                        List<LossOrderInfo> orderInfos3 = LitePal.where("BB_STATE = ? and PDA_SCANNER_IS_END = ?", "3", "0").find(LossOrderInfo.class);
+                        int incompleteNum = orderInfos.size();
+                        int ongoingNum = orderInfos2.size();
+                        int completeNUm = orderInfos3.size();
+                        binding.incompleteNum.setText(incompleteNum+"");
+                        binding.ongoingNum.setText(ongoingNum+"");
+                        binding.completedNum.setText(completeNUm+"");
+                    }
                 }
             }
         });
@@ -141,23 +148,29 @@ public class LossActivity extends BaseActivity implements View.OnClickListener {
             }else {
                 loadingPopup.show();
             }
-            viewModel.PDA_H(paramer).observe(this, new Observer<List<LossOrderInfo>>() {
+            viewModel.PDA_H(paramer).observe(this, new Observer<DataResult<List<LossOrderInfo>>>() {
                 @Override
-                public void onChanged(List<LossOrderInfo> returnInboundOrderInfos) {
+                public void onChanged(DataResult<List<LossOrderInfo>> dataResult) {
                     loadingPopup.dismiss();
-                    if (returnInboundOrderInfos == null){
-                        Toast.makeText(LossActivity.this, "数据为空", Toast.LENGTH_SHORT).show();
+                    int errcode = dataResult.getErrcode();
+                    if (errcode == -1){
+                        Toast.makeText(LossActivity.this, "网络异常", Toast.LENGTH_SHORT).show();
                     }else {
-                        binding.incompleteCl.performClick();
-                        List<LossOrderInfo> orderInfos = LitePal.where("BB_STATE = ?", "4").find(LossOrderInfo.class);
-                        List<LossOrderInfo> orderInfos2 = LitePal.where("BB_STATE = ?", "1").find(LossOrderInfo.class);
-                        List<LossOrderInfo> orderInfos3 = LitePal.where("BB_STATE = ? and PDA_SCANNER_IS_END = ?", "3", "0").find(LossOrderInfo.class);
-                        int incompleteNum = orderInfos.size();
-                        int ongoingNum = orderInfos2.size();
-                        int completeNUm = orderInfos3.size();
-                        binding.incompleteNum.setText(incompleteNum+"");
-                        binding.ongoingNum.setText(ongoingNum+"");
-                        binding.completedNum.setText(completeNUm+"");
+                        List<LossOrderInfo> lossOrderInfos = dataResult.getT();
+                        if (lossOrderInfos == null || lossOrderInfos.isEmpty()){
+                            Toast.makeText(LossActivity.this, "数据为空", Toast.LENGTH_SHORT).show();
+                        }else {
+                            binding.incompleteCl.performClick();
+                            List<LossOrderInfo> orderInfos = LitePal.where("BB_STATE = ?", "4").find(LossOrderInfo.class);
+                            List<LossOrderInfo> orderInfos2 = LitePal.where("BB_STATE = ?", "1").find(LossOrderInfo.class);
+                            List<LossOrderInfo> orderInfos3 = LitePal.where("BB_STATE = ? and PDA_SCANNER_IS_END = ?", "3", "0").find(LossOrderInfo.class);
+                            int incompleteNum = orderInfos.size();
+                            int ongoingNum = orderInfos2.size();
+                            int completeNUm = orderInfos3.size();
+                            binding.incompleteNum.setText(incompleteNum+"");
+                            binding.ongoingNum.setText(ongoingNum+"");
+                            binding.completedNum.setText(completeNUm+"");
+                        }
                     }
                 }
             });

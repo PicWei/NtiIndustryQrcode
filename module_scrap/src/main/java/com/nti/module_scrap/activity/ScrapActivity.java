@@ -15,6 +15,7 @@ import com.alibaba.android.arouter.facade.annotation.Route;
 import com.lxj.xpopup.XPopup;
 import com.lxj.xpopup.impl.LoadingPopupView;
 import com.nti.lib_common.activity.BaseActivity;
+import com.nti.lib_common.bean.DataResult;
 import com.nti.lib_common.bean.MessageEvent;
 import com.nti.lib_common.bean.Paramer;
 import com.nti.lib_common.bean.Params;
@@ -67,23 +68,29 @@ public class ScrapActivity extends BaseActivity implements View.OnClickListener 
         }else {
             loadingPopup.show();
         }
-        viewModel.PDA_H(paramer).observe(this, new Observer<List<ScrapOrderInfo>>() {
+        viewModel.PDA_H(paramer).observe(this, new Observer<DataResult<List<ScrapOrderInfo>>>() {
             @Override
-            public void onChanged(List<ScrapOrderInfo> ScrapOrderInfos) {
+            public void onChanged(DataResult<List<ScrapOrderInfo>> dataResult) {
                 loadingPopup.dismiss();
-                if (ScrapOrderInfos == null){
-                    Toast.makeText(ScrapActivity.this, "数据为空", Toast.LENGTH_SHORT).show();
+                int errcode = dataResult.getErrcode();
+                if (errcode == -1){
+                    Toast.makeText(ScrapActivity.this, "网络异常", Toast.LENGTH_SHORT).show();
                 }else {
-                    binding.incompleteCl.performClick();
-                    List<ScrapOrderInfo> orderInfos = LitePal.where("BB_STATE = ?", "4").find(ScrapOrderInfo.class);
-                    List<ScrapOrderInfo> orderInfos2 = LitePal.where("BB_STATE = ?", "1").find(ScrapOrderInfo.class);
-                    List<ScrapOrderInfo> orderInfos3 = LitePal.where("BB_STATE = ? and PDA_SCANNER_IS_END = ?", "3", "0").find(ScrapOrderInfo.class);
-                    int incompleteNum = orderInfos.size();
-                    int ongoingNum = orderInfos2.size();
-                    int completeNUm = orderInfos3.size();
-                    binding.incompleteNum.setText(incompleteNum+"");
-                    binding.ongoingNum.setText(ongoingNum+"");
-                    binding.completedNum.setText(completeNUm+"");
+                    List<ScrapOrderInfo> scrapOrderInfos = dataResult.getT();
+                    if (scrapOrderInfos == null || scrapOrderInfos.isEmpty()){
+                        Toast.makeText(ScrapActivity.this, "数据为空", Toast.LENGTH_SHORT).show();
+                    }else {
+                        binding.incompleteCl.performClick();
+                        List<ScrapOrderInfo> orderInfos = LitePal.where("BB_STATE = ?", "4").find(ScrapOrderInfo.class);
+                        List<ScrapOrderInfo> orderInfos2 = LitePal.where("BB_STATE = ?", "1").find(ScrapOrderInfo.class);
+                        List<ScrapOrderInfo> orderInfos3 = LitePal.where("BB_STATE = ? and PDA_SCANNER_IS_END = ?", "3", "0").find(ScrapOrderInfo.class);
+                        int incompleteNum = orderInfos.size();
+                        int ongoingNum = orderInfos2.size();
+                        int completeNUm = orderInfos3.size();
+                        binding.incompleteNum.setText(incompleteNum+"");
+                        binding.ongoingNum.setText(ongoingNum+"");
+                        binding.completedNum.setText(completeNUm+"");
+                    }
                 }
             }
         });
@@ -143,23 +150,29 @@ public class ScrapActivity extends BaseActivity implements View.OnClickListener 
             }else {
                 loadingPopup.show();
             }
-            viewModel.PDA_H(paramer).observe(this, new Observer<List<ScrapOrderInfo>>() {
+            viewModel.PDA_H(paramer).observe(this, new Observer<DataResult<List<ScrapOrderInfo>>>() {
                 @Override
-                public void onChanged(List<ScrapOrderInfo> ScrapOrderInfos) {
+                public void onChanged(DataResult<List<ScrapOrderInfo>> dataResult) {
                     loadingPopup.dismiss();
-                    if (ScrapOrderInfos == null){
-                        Toast.makeText(ScrapActivity.this, "数据为空", Toast.LENGTH_SHORT).show();
+                    int errcode = dataResult.getErrcode();
+                    if (errcode == -1){
+                        Toast.makeText(ScrapActivity.this, "网络异常", Toast.LENGTH_SHORT).show();
                     }else {
-                        binding.incompleteCl.performClick();
-                        List<ScrapOrderInfo> orderInfos = LitePal.where("BB_STATE = ?", "4").find(ScrapOrderInfo.class);
-                        List<ScrapOrderInfo> orderInfos2 = LitePal.where("BB_STATE = ?", "1").find(ScrapOrderInfo.class);
-                        List<ScrapOrderInfo> orderInfos3 = LitePal.where("BB_STATE = ? and PDA_SCANNER_IS_END = ?", "3", "0").find(ScrapOrderInfo.class);
-                        int incompleteNum = orderInfos.size();
-                        int ongoingNum = orderInfos2.size();
-                        int completeNUm = orderInfos3.size();
-                        binding.incompleteNum.setText(incompleteNum+"");
-                        binding.ongoingNum.setText(ongoingNum+"");
-                        binding.completedNum.setText(completeNUm+"");
+                        List<ScrapOrderInfo> scrapOrderInfos = dataResult.getT();
+                        if (scrapOrderInfos == null || scrapOrderInfos.isEmpty()){
+                            Toast.makeText(ScrapActivity.this, "数据为空", Toast.LENGTH_SHORT).show();
+                        }else {
+                            binding.incompleteCl.performClick();
+                            List<ScrapOrderInfo> orderInfos = LitePal.where("BB_STATE = ?", "4").find(ScrapOrderInfo.class);
+                            List<ScrapOrderInfo> orderInfos2 = LitePal.where("BB_STATE = ?", "1").find(ScrapOrderInfo.class);
+                            List<ScrapOrderInfo> orderInfos3 = LitePal.where("BB_STATE = ? and PDA_SCANNER_IS_END = ?", "3", "0").find(ScrapOrderInfo.class);
+                            int incompleteNum = orderInfos.size();
+                            int ongoingNum = orderInfos2.size();
+                            int completeNUm = orderInfos3.size();
+                            binding.incompleteNum.setText(incompleteNum+"");
+                            binding.ongoingNum.setText(ongoingNum+"");
+                            binding.completedNum.setText(completeNUm+"");
+                        }
                     }
                 }
             });

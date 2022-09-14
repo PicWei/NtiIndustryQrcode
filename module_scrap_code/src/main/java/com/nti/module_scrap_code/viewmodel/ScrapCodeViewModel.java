@@ -8,6 +8,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.google.gson.JsonObject;
+import com.nti.lib_common.bean.DataResult;
 import com.nti.lib_common.bean.ErrorSignReceiveParamer;
 import com.nti.lib_common.bean.Paramer;
 import com.nti.lib_common.bean.UpParamer;
@@ -29,13 +30,13 @@ public class ScrapCodeViewModel extends AndroidViewModel {
     private ScrapCodeRepository repository = new ScrapCodeRepository();
     private MutableLiveData<JsonObject> data;
     private MutableLiveData<JsonObject> data3;
-    private MutableLiveData<List<ScrapCodeOrderInfo>> data2 = new MutableLiveData<>();
+    private MutableLiveData<DataResult<List<ScrapCodeOrderInfo>>> data2 = new MutableLiveData<>();
 
     public ScrapCodeViewModel(@NonNull @NotNull Application application) {
         super(application);
     }
 
-    public MutableLiveData<List<ScrapCodeOrderInfo>> PDA_H(Paramer paramer){
+    public MutableLiveData<DataResult<List<ScrapCodeOrderInfo>>> PDA_H(Paramer paramer){
         data2 = repository.PDA_H(paramer);
         return data2;
     }

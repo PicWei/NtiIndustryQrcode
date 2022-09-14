@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.nti.lib_common.bean.DataResult;
 import com.nti.lib_common.bean.ErrorSignReceiveParamer;
 import com.nti.lib_common.bean.Paramer;
 import com.nti.lib_common.bean.UpParamer;
@@ -34,8 +35,8 @@ import io.reactivex.schedulers.Schedulers;
  * @describe
  */
 public class ScrapCodeRepository {
-    public MutableLiveData<List<ScrapCodeOrderInfo>> PDA_H(Paramer paramer){
-        final MutableLiveData<List<ScrapCodeOrderInfo>> data = new MutableLiveData<>();
+    public MutableLiveData<DataResult<List<ScrapCodeOrderInfo>>> PDA_H(Paramer paramer){
+        final MutableLiveData<DataResult<List<ScrapCodeOrderInfo>>> data = new MutableLiveData<>();
         final List<ScrapCodeOrderInfo> orderInfos = new ArrayList<>();
         HttpUtils.getInstance().with(IScrapCodeService.class).PDA_H(paramer)
                 .subscribeOn(Schedulers.io())
@@ -155,8 +156,10 @@ public class ScrapCodeRepository {
                                     }
                                     String PDA_SCANNER_IS_END = object.get("PDA_SCANNER_IS_END").toString().replace("\"", "");
                                     String BB_STATE = object.get("BB_STATE").toString().replace("\"", "");
+                                    String A_NO = object.get("A_NO").toString().replace("\"", "");
                                     ScrapCodeOrderInfo orderInfo = new ScrapCodeOrderInfo(BB_UUID, BB_CONTRACT_NO, BB_BT_CODE, BB_TICKET_NO, BB_WS_CODE,
                                             BB_RELATE_CONTRACT_NO, B_NAME, BB_INPUT_DATE, BB_TOTAL_ALL_NUM1, BB_TOTAL_SCAN_NUM, BB_TOTAL_PNUM, BB_FLOW_NAME, BB_STATE, PDA_SCANNER_IS_END);
+                                    orderInfo.setA_NO(A_NO);
                                     orderInfos.add(orderInfo);
                                 }catch (Exception e){
                                     e.printStackTrace();
@@ -169,7 +172,8 @@ public class ScrapCodeRepository {
                         try {
                             LitePal.deleteAll(ScrapCodeOrderInfo.class);
                             LitePal.saveAll(orderInfos);
-                            data.setValue(orderInfos);
+                            DataResult<List<ScrapCodeOrderInfo>> dataResult = new DataResult<>(0, orderInfos);
+                            data.setValue(dataResult);
                         }catch (Exception e){
                             e.printStackTrace();
                         }
@@ -178,7 +182,8 @@ public class ScrapCodeRepository {
 
                     @Override
                     public void onError(@NotNull Throwable e) {
-                        data.setValue(null);
+                        DataResult<List<ScrapCodeOrderInfo>> dataResult = new DataResult<>(0, orderInfos);
+                        data.setValue(dataResult);
                     }
 
                     @Override

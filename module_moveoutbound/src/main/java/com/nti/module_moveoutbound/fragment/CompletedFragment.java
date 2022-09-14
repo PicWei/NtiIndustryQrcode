@@ -197,16 +197,15 @@ public class CompletedFragment extends Fragment {
                 viewModel.sellBarcodeRecive(paramer).observe(getActivity(), new Observer<DataResult<JsonObject>>() {
                     @Override
                     public void onChanged(DataResult<JsonObject> dataResult) {
-
-                        /*if (jsonObject == null){
-                            Toast.makeText(getActivity(), "网络异常", Toast.LENGTH_SHORT).show();
-                        }else {
+                        int errcode = dataResult.getErrcode();
+                        if (errcode == 0){
+                            JsonObject jsonObject = dataResult.getT();
                             String code = jsonObject.get("code").toString().replace("\"", "");
                             String message = jsonObject.get("message").toString().replace("\"", "");
-                            if (code.equals("200")){
+                            if (code.equals("0")) {
                                 ContentValues cv = new ContentValues();
                                 cv.put("isSubmit", true);
-                                for (int i = 0; i < uuids.size(); i++){
+                                for (int i = 0; i < uuids.size(); i++) {
                                     String uuid = uuids.get(i);
                                     LitePal.updateAll(MoveoutboundBarcode.class, cv, "UUID = ?", uuid);
                                     List<MoveoutboundOrderInfo> salesFactoryOrderInfos = LitePal.where("BB_UUID = ?", uuid).find(MoveoutboundOrderInfo.class);
@@ -216,16 +215,17 @@ public class CompletedFragment extends Fragment {
                                     String scanNum = salesFactoryOrderInfos.get(0).getBB_TOTAL_SCAN_NUM();
                                     int mTotalNum = Integer.valueOf(totalNum);
                                     int mScanNum = Integer.valueOf(scanNum);
-                                    if (mTotalNum == (size + mScanNum)){
+                                    if (mTotalNum == (size + mScanNum)) {
                                         LitePal.deleteAll(MoveoutboundBarcode.class, "BB_UUID = ?", uuid);
                                     }
                                 }
                                 Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
                             }else {
-                                Toast.makeText(getActivity(), R.string.sumbit_expection, Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
                             }
-                        }*/
-
+                        }else {
+                            Toast.makeText(getActivity(), "网络异常", Toast.LENGTH_SHORT).show();
+                        }
                     }
                 });
 

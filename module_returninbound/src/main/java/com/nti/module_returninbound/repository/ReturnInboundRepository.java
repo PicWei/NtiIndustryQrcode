@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.nti.lib_common.bean.DataResult;
 import com.nti.lib_common.utils.HttpUtils;
 import com.nti.module_returninbound.bean.ErrorSignReceiveParamer;
 import com.nti.module_returninbound.bean.Paramer;
@@ -34,8 +35,8 @@ import io.reactivex.schedulers.Schedulers;
  */
 public class ReturnInboundRepository {
 
-    public MutableLiveData<List<ReturnInboundOrderInfo>> PDA_H(Paramer paramer){
-        final MutableLiveData<List<ReturnInboundOrderInfo>> data = new MutableLiveData<>();
+    public MutableLiveData<DataResult<List<ReturnInboundOrderInfo>>> PDA_H(Paramer paramer){
+        final MutableLiveData<DataResult<List<ReturnInboundOrderInfo>>> data = new MutableLiveData<>();
         final List<ReturnInboundOrderInfo> orderInfos = new ArrayList<>();
         HttpUtils.getInstance().with(IReturnInboundService.class).PDA_H(paramer)
                 .subscribeOn(Schedulers.io())
@@ -156,8 +157,10 @@ public class ReturnInboundRepository {
                                     }
                                     String PDA_SCANNER_IS_END = object.get("PDA_SCANNER_IS_END").toString().replace("\"", "");
                                     String BB_STATE = object.get("BB_STATE").toString().replace("\"", "");
+                                    String A_NO = object.get("A_NO").toString().replace("\"", "");
                                     ReturnInboundOrderInfo orderInfo = new ReturnInboundOrderInfo(BB_UUID, BB_CONTRACT_NO, BB_BT_CODE, BB_TICKET_NO, BB_WS_CODE,
                                             BB_RELATE_CONTRACT_NO, B_NAME, BB_INPUT_DATE, BB_TOTAL_ALL_NUM1, BB_TOTAL_SCAN_NUM, BB_TOTAL_PNUM, BB_FLOW_NAME, BB_STATE, PDA_SCANNER_IS_END);
+                                    orderInfo.setA_NO(A_NO);
                                     orderInfos.add(orderInfo);
                                 }catch (Exception e){
                                     e.printStackTrace();
@@ -169,7 +172,9 @@ public class ReturnInboundRepository {
                         try {
                             LitePal.deleteAll(ReturnInboundOrderInfo.class);
                             LitePal.saveAll(orderInfos);
-                            data.setValue(orderInfos);
+                  //          data.setValue(orderInfos);
+                            DataResult<List<ReturnInboundOrderInfo>> dataResult = new DataResult<>(0, orderInfos);
+                            data.setValue(dataResult);
                         }catch (Exception e){
                             e.printStackTrace();
                         }
@@ -178,7 +183,8 @@ public class ReturnInboundRepository {
 
                     @Override
                     public void onError(@NotNull Throwable e) {
-                        data.setValue(null);
+                        DataResult<List<ReturnInboundOrderInfo>> dataResult = new DataResult<>(-1, null);
+                        data.setValue(dataResult);
                     }
 
                     @Override

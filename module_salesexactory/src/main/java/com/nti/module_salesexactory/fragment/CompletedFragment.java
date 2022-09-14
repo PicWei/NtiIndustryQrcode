@@ -201,46 +201,17 @@ public class CompletedFragment extends Fragment {
                 String SYSTEM_SERV = "INDUT_SALES_FACTORY";
                 UploadSellParamer uploadSellParamer = new UploadSellParamer(sellParamers, SYSTEM_SERV);
                 SellBarcodeReciveParamer paramer = new SellBarcodeReciveParamer(uploadSellParamer);
- //               Log.i("TAG", "paramer:" + new Gson().toJson(paramer));
+                Log.i("TAG", "paramer:" + new Gson().toJson(paramer));
                 viewModel.sellBarcodeRecive(paramer).observe(getActivity(), new Observer<DataResult<JsonObject>>() {
                     @Override
                     public void onChanged(DataResult<JsonObject> dataResult) {
+                        Log.i("TAG", "dataResult:" + dataResult.toString());
                         int errcode = dataResult.getErrcode();
                         if (errcode == 0){
                             JsonObject jsonObject = dataResult.getT();
                             String code = jsonObject.get("code").toString().replace("\"", "");
                             String message = jsonObject.get("message").toString().replace("\"", "");
-                            if (code.equals("200")){
-                                ContentValues cv = new ContentValues();
-                                cv.put("isSubmit", true);
-                                for (int i = 0; i < uuids.size(); i++){
-                                    String uuid = uuids.get(i);
-                                    LitePal.updateAll(SalesBarcode.class, cv, "UUID = ?", uuid);
-                                    List<SalesFactoryOrderInfo> salesFactoryOrderInfos = LitePal.where("BB_UUID = ?", uuid).find(SalesFactoryOrderInfo.class);
-                                    List<SalesBarcode> barcodes = LitePal.where("UUID = ?", uuid).find(SalesBarcode.class);
-                                    int size = barcodes.size();
-                                    String totalNum = salesFactoryOrderInfos.get(0).getBB_TOTAL_PNUM();
-                                    String scanNum = salesFactoryOrderInfos.get(0).getBB_TOTAL_SCAN_NUM();
-                                    int mTotalNum = Integer.valueOf(totalNum);
-                                    int mScanNum = Integer.valueOf(scanNum);
-                                    if (mTotalNum == (size + mScanNum)){
-                                        LitePal.deleteAll(SalesBarcode.class, "BB_UUID = ?", uuid);
-                                    }
-                                }
-                                Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
-                            }
-                        }else if (errcode == -1){
-                            Toast.makeText(getActivity(), "网络异常", Toast.LENGTH_SHORT).show();
-                        }
-
-
-                        /*if (jsonObject == null){
-                            Toast.makeText(getActivity(), "网络异常", Toast.LENGTH_SHORT).show();
-                        }else {
-
-                            String code = jsonObject.get("code").toString().replace("\"", "");
-                            String message = jsonObject.get("message").toString().replace("\"", "");
-                            if (code.equals("200")){
+                            if (code.equals("0")){
                                 ContentValues cv = new ContentValues();
                                 cv.put("isSubmit", true);
                                 for (int i = 0; i < uuids.size(); i++){
@@ -259,9 +230,11 @@ public class CompletedFragment extends Fragment {
                                 }
                                 Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
                             }else {
-                                Toast.makeText(getActivity(), R.string.sumbit_expection, Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
                             }
-                        }*/
+                        }else if (errcode == -1){
+                            Toast.makeText(getActivity(), "网络异常", Toast.LENGTH_SHORT).show();
+                        }
 
                     }
                 });

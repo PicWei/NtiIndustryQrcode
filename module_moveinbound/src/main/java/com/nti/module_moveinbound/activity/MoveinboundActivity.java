@@ -14,6 +14,7 @@ import com.alibaba.android.arouter.facade.annotation.Route;
 import com.lxj.xpopup.XPopup;
 import com.lxj.xpopup.impl.LoadingPopupView;
 import com.nti.lib_common.activity.BaseActivity;
+import com.nti.lib_common.bean.DataResult;
 import com.nti.lib_common.bean.MessageEvent;
 import com.nti.lib_common.bean.Paramer;
 import com.nti.lib_common.bean.Params;
@@ -65,23 +66,29 @@ public class MoveinboundActivity extends BaseActivity implements View.OnClickLis
         }else {
             loadingPopup.show();
         }
-        viewModel.PDA_H(paramer).observe(this, new Observer<List<MoveinboundOrderInfo>>() {
+        viewModel.PDA_H(paramer).observe(this, new Observer<DataResult<List<MoveinboundOrderInfo>>>() {
             @Override
-            public void onChanged(List<MoveinboundOrderInfo> returnInboundOrderInfos) {
+            public void onChanged(DataResult<List<MoveinboundOrderInfo>> dataResult) {
                 loadingPopup.dismiss();
-                if (returnInboundOrderInfos == null){
-                    Toast.makeText(MoveinboundActivity.this, "数据为空", Toast.LENGTH_SHORT).show();
+                int errcode = dataResult.getErrcode();
+                if (errcode == -1){
+                    Toast.makeText(MoveinboundActivity.this, "网络异常", Toast.LENGTH_SHORT).show();
                 }else {
-                    binding.incompleteCl.performClick();
-                    List<MoveinboundOrderInfo> orderInfos = LitePal.where("BB_STATE = ?", "4").find(MoveinboundOrderInfo.class);
-                    List<MoveinboundOrderInfo> orderInfos2 = LitePal.where("BB_STATE = ?", "1").find(MoveinboundOrderInfo.class);
-                    List<MoveinboundOrderInfo> orderInfos3 = LitePal.where("BB_STATE = ? and PDA_SCANNER_IS_END = ?", "3", "0").find(MoveinboundOrderInfo.class);
-                    int incompleteNum = orderInfos.size();
-                    int ongoingNum = orderInfos2.size();
-                    int completeNUm = orderInfos3.size();
-                    binding.incompleteNum.setText(incompleteNum+"");
-                    binding.ongoingNum.setText(ongoingNum+"");
-                    binding.completedNum.setText(completeNUm+"");
+                    List<MoveinboundOrderInfo> moveinboundOrderInfos = dataResult.getT();
+                    if (moveinboundOrderInfos == null || moveinboundOrderInfos.isEmpty()){
+                        Toast.makeText(MoveinboundActivity.this, "数据为空", Toast.LENGTH_SHORT).show();
+                    }else {
+                        binding.incompleteCl.performClick();
+                        List<MoveinboundOrderInfo> orderInfos = LitePal.where("BB_STATE = ?", "4").find(MoveinboundOrderInfo.class);
+                        List<MoveinboundOrderInfo> orderInfos2 = LitePal.where("BB_STATE = ?", "1").find(MoveinboundOrderInfo.class);
+                        List<MoveinboundOrderInfo> orderInfos3 = LitePal.where("BB_STATE = ? and PDA_SCANNER_IS_END = ?", "3", "0").find(MoveinboundOrderInfo.class);
+                        int incompleteNum = orderInfos.size();
+                        int ongoingNum = orderInfos2.size();
+                        int completeNUm = orderInfos3.size();
+                        binding.incompleteNum.setText(incompleteNum+"");
+                        binding.ongoingNum.setText(ongoingNum+"");
+                        binding.completedNum.setText(completeNUm+"");
+                    }
                 }
             }
         });
@@ -141,23 +148,29 @@ public class MoveinboundActivity extends BaseActivity implements View.OnClickLis
             }else {
                 loadingPopup.show();
             }
-            viewModel.PDA_H(paramer).observe(this, new Observer<List<MoveinboundOrderInfo>>() {
+            viewModel.PDA_H(paramer).observe(this, new Observer<DataResult<List<MoveinboundOrderInfo>>>() {
                 @Override
-                public void onChanged(List<MoveinboundOrderInfo> returnInboundOrderInfos) {
+                public void onChanged(DataResult<List<MoveinboundOrderInfo>> dataResult) {
                     loadingPopup.dismiss();
-                    if (returnInboundOrderInfos == null){
-                        Toast.makeText(MoveinboundActivity.this, "数据为空", Toast.LENGTH_SHORT).show();
+                    int errcode = dataResult.getErrcode();
+                    if (errcode == -1){
+                        Toast.makeText(MoveinboundActivity.this, "网络异常", Toast.LENGTH_SHORT).show();
                     }else {
-                        binding.incompleteCl.performClick();
-                        List<MoveinboundOrderInfo> orderInfos = LitePal.where("BB_STATE = ?", "4").find(MoveinboundOrderInfo.class);
-                        List<MoveinboundOrderInfo> orderInfos2 = LitePal.where("BB_STATE = ?", "1").find(MoveinboundOrderInfo.class);
-                        List<MoveinboundOrderInfo> orderInfos3 = LitePal.where("BB_STATE = ? and PDA_SCANNER_IS_END = ?", "3", "0").find(MoveinboundOrderInfo.class);
-                        int incompleteNum = orderInfos.size();
-                        int ongoingNum = orderInfos2.size();
-                        int completeNUm = orderInfos3.size();
-                        binding.incompleteNum.setText(incompleteNum+"");
-                        binding.ongoingNum.setText(ongoingNum+"");
-                        binding.completedNum.setText(completeNUm+"");
+                        List<MoveinboundOrderInfo> moveinboundOrderInfos = dataResult.getT();
+                        if (moveinboundOrderInfos == null || moveinboundOrderInfos.isEmpty()){
+                            Toast.makeText(MoveinboundActivity.this, "数据为空", Toast.LENGTH_SHORT).show();
+                        }else {
+                            binding.incompleteCl.performClick();
+                            List<MoveinboundOrderInfo> orderInfos = LitePal.where("BB_STATE = ?", "4").find(MoveinboundOrderInfo.class);
+                            List<MoveinboundOrderInfo> orderInfos2 = LitePal.where("BB_STATE = ?", "1").find(MoveinboundOrderInfo.class);
+                            List<MoveinboundOrderInfo> orderInfos3 = LitePal.where("BB_STATE = ? and PDA_SCANNER_IS_END = ?", "3", "0").find(MoveinboundOrderInfo.class);
+                            int incompleteNum = orderInfos.size();
+                            int ongoingNum = orderInfos2.size();
+                            int completeNUm = orderInfos3.size();
+                            binding.incompleteNum.setText(incompleteNum+"");
+                            binding.ongoingNum.setText(ongoingNum+"");
+                            binding.completedNum.setText(completeNUm+"");
+                        }
                     }
                 }
             });

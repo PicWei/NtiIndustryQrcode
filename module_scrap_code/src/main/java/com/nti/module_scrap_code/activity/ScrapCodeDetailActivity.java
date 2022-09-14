@@ -8,6 +8,7 @@ import android.media.AudioManager;
 import android.media.SoundPool;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -26,17 +27,25 @@ import com.lxj.xpopup.core.BasePopupView;
 import com.lxj.xpopup.interfaces.OnConfirmListener;
 import com.nti.lib_common.activity.BaseActivity;
 import com.nti.lib_common.activity.CustomCaptureActivity;
+import com.nti.lib_common.bean.DataResult;
 import com.nti.lib_common.bean.ErrorBarcode;
 import com.nti.lib_common.bean.ErrorBarcodeParamer;
 import com.nti.lib_common.bean.ErrorSignReceiveParamer;
 import com.nti.lib_common.bean.MessageEvent;
+import com.nti.lib_common.bean.SalesBarcodeParamer;
+import com.nti.lib_common.bean.SalesOrderParamer;
+import com.nti.lib_common.bean.SellBarcodeReciveParamer;
+import com.nti.lib_common.bean.SellParamer;
 import com.nti.lib_common.bean.UpParamer;
 import com.nti.lib_common.bean.UpdataStatuesParamer;
+import com.nti.lib_common.bean.UploadSellParamer;
 import com.nti.lib_common.constants.ARouterPath;
 import com.nti.lib_common.constants.BusinessType;
+import com.nti.lib_common.utils.DateUtil;
 import com.nti.lib_common.utils.DeviceUtils;
 import com.nti.lib_common.view.BarcodeListPopup;
 
+import com.nti.lib_common.viewmodel.SellBarcodeReciveViewModel;
 import com.nti.module_scrap_code.R;
 import com.nti.module_scrap_code.adapter.ScrapDetailAdapter;
 
@@ -79,6 +88,8 @@ public class ScrapCodeDetailActivity extends BaseActivity implements View.OnClic
     private float volumnRatio;
     private String BI_SCANNER_CODE;
     private ScrapCodeViewModel viewModel;
+    private SellBarcodeReciveViewModel viewModel3;
+    private String A_NO;
     /**
      * 扫描跳转Activity RequestCode
      */
@@ -109,6 +120,9 @@ public class ScrapCodeDetailActivity extends BaseActivity implements View.OnClic
         binding.orderTv.setText(contractNo);
         binding.inflowTv.setText(flowName);
         viewModel = new ViewModelProvider(this).get(ScrapCodeViewModel.class);
+        viewModel3 = new ViewModelProvider(this).get(SellBarcodeReciveViewModel.class);
+        List<ScrapCodeOrderInfo> infos = LitePal.where("BB_UUID = ?", uuid).find(ScrapCodeOrderInfo.class);
+        A_NO = infos.get(0).getA_NO();
     }
 
     @Override
@@ -274,88 +288,164 @@ public class ScrapCodeDetailActivity extends BaseActivity implements View.OnClic
             if (bundle != null) {
                 if (bundle.getInt(XQRCode.RESULT_TYPE) == XQRCode.RESULT_SUCCESS) {
                     String result = bundle.getString(XQRCode.RESULT_DATA);
-                    int count = 0;
-                    List<ScrapCodeBarcode> barcodes = LitePal.where("barcode = ?", result).find(ScrapCodeBarcode.class);
-                    if (barcodes.size() > 0){
+                    if (result.length() != 32){
                         playSound(2);
-                        //             sendErrorCode(result);
-                        Toast.makeText(this, "此条码已扫过", Toast.LENGTH_LONG).show();
+                        sendErrorCode(result);
+                        Toast.makeText(this, "条码格式错误", Toast.LENGTH_LONG).show();
                         return;
-                    }
-                    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                    String scantime = format.format(new Date());
-                    for (int i = 0; i < detailList2.size(); i++){
-                        int mPlanqty = 0;
-                        String picgname = detailList2.get(i).getBD_PCIG_NAME();
-                        try {
-                            String planqty = detailList2.get(i).getBD_BILL_PNUM();
-                            mPlanqty = Integer.valueOf(planqty);
-                        }catch (Exception e){
-                            e.printStackTrace();
+                    }else {
+                        if (!result.startsWith("91")){
+                            playSound(2);
+                            sendErrorCode(result);
+                            Toast.makeText(this, "条码格式错误", Toast.LENGTH_LONG).show();
+                            return;
                         }
-                        ScrapCodeDetail detail = detailList2.get(i);
-                        String pcigCode = detail.getBD_PCIG_CODE();
-                        String pcigcodesub = pcigCode.substring(7, 13);
-                        String pcigName = detail.getBD_PCIG_NAME();
-                        String code = result.substring(2, 8);
-                        if (pcigcodesub.equals(code)){
-                            String scanQty = detail.getBD_SCAN_NUM();
-                            int mscanQty;
-                            if (TextUtils.isEmpty(scanQty)){
-                                mscanQty = 1;
-                            }else {
-                                mscanQty = Integer.valueOf(scanQty) + 1;
-                            }
-                            if (mscanQty > mPlanqty){
-                                playSound(2);
-                                //                    sendErrorCode(result);
-                                Toast.makeText(this, "扫描量大于计划量,暂停扫描", Toast.LENGTH_SHORT).show();
-                                return;
-                            }
-                            String scancode = DeviceUtils.getDevUUID(this);
-                            ScrapCodeBarcode salesBarcode = new ScrapCodeBarcode(uuid, pcigCode, pcigName, result, scantime, scancode);
-                            salesBarcode.save();
-                            String new_scanQty = String.valueOf(mscanQty);
-                            ContentValues cv = new ContentValues();
-                            cv.put("BD_SCAN_NUM", new_scanQty);
-                            LitePal.updateAll(ScrapCodeDetail.class, cv, "BD_PCIG_CODE = ?", pcigCode);
-                            ContentValues cv2 = new ContentValues();
-                            List<ScrapCodeOrderInfo> orderInfos = LitePal.where("BB_UUID = ?", uuid).find(ScrapCodeOrderInfo.class);
-                            String pum = orderInfos.get(0).getBB_TOTAL_PNUM();
-                            String BB_TOTAL_SCAN_NUM = orderInfos.get(0).getBB_TOTAL_SCAN_NUM();
-                            int scannum = Integer.parseInt(BB_TOTAL_SCAN_NUM) + 1;
-                            int unscannum = Integer.parseInt(pum) - scannum;
-                            BB_TOTAL_SCAN_NUM = String.valueOf(scannum);
-                            cv2.put("BB_TOTAL_SCAN_NUM", BB_TOTAL_SCAN_NUM);
-                            LitePal.updateAll(ScrapCodeOrderInfo.class, cv2, "BB_UUID = ?", uuid);
-                            binding.brandnameTv.setText(picgname);
-                            binding.barcodeTv.setText(result);
-                            binding.scanTotalTv.setText(pum);
-                            binding.unscanTotalTv.setText(unscannum+"");
-                            binding.scanedTotalTv.setText(scannum+"");
-                            break;
-                        }else {
-                            count++;
+                        String type = result.substring(22, 23);
+                        if (!type.equals("1") && !type.equals("2") && !type.equals("3") && !type.equals("4")){
+                            playSound(2);
+                            sendErrorCode(result);
+                            Toast.makeText(this, "条码经营方式未知", Toast.LENGTH_LONG).show();
+                            return;
                         }
-                    }
-                    if (count == detailList2.size()){
-                        playSound(2);
-                        //              sendErrorCode(result);
-                        Toast.makeText(this, "条码不符", Toast.LENGTH_LONG).show();
-                        return;
-                    }
-                    detailList2.clear();
-                    detailList2 = LitePal.where("BD_BB_UUID = ?", uuid).find(ScrapCodeDetail.class);
-                    detailList.clear();
-                    detailList.addAll(detailList2);
-                    String pum = detailList2.get(0).getBD_BILL_PNUM();
-                    String scanNum = detailList2.get(0).getBD_SCAN_NUM();
-                    int unscanNum = Integer.parseInt(pum) - Integer.parseInt(scanNum);
-                    binding.scanedTotalTv.setText(pum);
-                    binding.unscanTotalTv.setText(unscanNum+"");
-                    binding.scanedTotalTv.setText(scanNum);
+                        String date = result.substring(16, 22);
+                        if (!DateUtil.isValidDate(date)){
+                            playSound(2);
+                            sendErrorCode(result);
+                            Toast.makeText(this, "条码日期无效", Toast.LENGTH_LONG).show();
+                            return;
+                        }
+                        String unitcode = result.substring(8, 16);
+                        if (!unitcode.equals(A_NO)){
+                            playSound(2);
+                            sendErrorCode(result);
+                            Toast.makeText(this, "生产厂家与当前单位不一致", Toast.LENGTH_LONG).show();
+                            return;
+                        }
+                        int count = 0;
+                        List<ScrapCodeBarcode> barcodes = LitePal.where("barcode = ?", result).find(ScrapCodeBarcode.class);
+                        List<SalesOrderParamer> paramers = new ArrayList<>();
+                        if (barcodes.size() > 0){
+                            playSound(2);
+                            sendErrorCode(result);
+                            Toast.makeText(this, "此条码已扫过", Toast.LENGTH_LONG).show();
+                            return;
+                        }
+                        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                        String scantime = format.format(new Date());
+                        for (int i = 0; i < detailList2.size(); i++){
+                            int mPlanqty = 0;
+                            String picgname = detailList2.get(i).getBD_PCIG_NAME();
+                            try {
+                                String planqty = detailList2.get(i).getBD_BILL_PNUM();
+                                mPlanqty = Integer.valueOf(planqty);
+                            }catch (Exception e){
+                                e.printStackTrace();
+                            }
+                            ScrapCodeDetail detail = detailList2.get(i);
+                            String pcigCode = detail.getBD_PCIG_CODE();
+                            String pcigcodesub = pcigCode.substring(7, 13);
+                            String pcigName = detail.getBD_PCIG_NAME();
+                            String code = result.substring(2, 8);
+                            if (pcigcodesub.equals(code)){
+                                String scanQty = detail.getBD_SCAN_NUM();
+                                int mscanQty;
+                                if (TextUtils.isEmpty(scanQty)){
+                                    mscanQty = 1;
+                                }else {
+                                    mscanQty = Integer.valueOf(scanQty) + 1;
+                                }
+                                if (mscanQty > mPlanqty){
+                                    playSound(2);
+                                    sendErrorCode(result);
+                                    Toast.makeText(this, "扫描量大于计划量,暂停扫描", Toast.LENGTH_SHORT).show();
+                                    return;
+                                }
+                                String scancode = DeviceUtils.getDevUUID(this);
+                                ScrapCodeBarcode salesBarcode = new ScrapCodeBarcode(uuid, pcigCode, pcigName, result, scantime, scancode);
+                                salesBarcode.save();
+                                String new_scanQty = String.valueOf(mscanQty);
+                                ContentValues cv = new ContentValues();
+                                cv.put("BD_SCAN_NUM", new_scanQty);
+                                LitePal.updateAll(ScrapCodeDetail.class, cv, "BD_PCIG_CODE = ?", pcigCode);
+                                ContentValues cv2 = new ContentValues();
+                                List<ScrapCodeOrderInfo> orderInfos = LitePal.where("BB_UUID = ?", uuid).find(ScrapCodeOrderInfo.class);
+                                String pum = orderInfos.get(0).getBB_TOTAL_PNUM();
+                                String BB_TOTAL_SCAN_NUM = orderInfos.get(0).getBB_TOTAL_SCAN_NUM();
+                                int scannum = Integer.parseInt(BB_TOTAL_SCAN_NUM) + 1;
+                                int unscannum = Integer.parseInt(pum) - scannum;
+                                BB_TOTAL_SCAN_NUM = String.valueOf(scannum);
+                                cv2.put("BB_TOTAL_SCAN_NUM", BB_TOTAL_SCAN_NUM);
+                                LitePal.updateAll(ScrapCodeOrderInfo.class, cv2, "BB_UUID = ?", uuid);
+                                binding.brandnameTv.setText(picgname);
+                                binding.barcodeTv.setText(result);
+                                binding.scanTotalTv.setText(pum);
+                                binding.unscanTotalTv.setText(unscannum+"");
+                                binding.scanedTotalTv.setText(scannum+"");
 
-                    adapter.notifyDataSetChanged();
+                                List<SalesBarcodeParamer> salesBarcodeParamers = new ArrayList<>();
+                                String BI_FEEDBACK_TIME = format.format(new Date());
+                                SalesBarcodeParamer salesBarcodeParamer = new SalesBarcodeParamer(result, scantime, BI_FEEDBACK_TIME);
+                                salesBarcodeParamer.setBI_SCANNER_CODE(BI_SCANNER_CODE);
+                                salesBarcodeParamer.setBI_SERIAL_NO("");
+                                salesBarcodeParamer.setBI_LOCAL_SCAN_DATE(scantime);
+                                salesBarcodeParamer.setBI_PACK_ID("");
+                                salesBarcodeParamers.add(salesBarcodeParamer);
+                                int mscanqty = salesBarcodeParamers.size();
+                                SalesOrderParamer salesOrderParamer = new SalesOrderParamer(mPlanqty, pcigCode, mscanqty, salesBarcodeParamers);
+                                paramers.add(salesOrderParamer);
+                                SellParamer sellParamer = new SellParamer(uuid, paramers);
+                                List<SellParamer> sellParamers = new ArrayList<>();
+                                sellParamers.add(sellParamer);
+                                String SYSTEM_SERV = "INDUT_OUT_SCRAP";
+                                UploadSellParamer uploadSellParamer = new UploadSellParamer(sellParamers, SYSTEM_SERV);
+                                SellBarcodeReciveParamer paramer = new SellBarcodeReciveParamer(uploadSellParamer);
+                                Log.i("TAG", "paramer:" + paramer.toString());
+                                viewModel3.sellBarcodeRecive(paramer).observe(this, new Observer<DataResult<JsonObject>>() {
+                                    @Override
+                                    public void onChanged(DataResult<JsonObject> dataResult) {
+                                        Log.i("TAG", "dataResult:" + dataResult.toString());
+                                        int errcode = dataResult.getErrcode();
+                                        if (errcode == 0){
+                                            JsonObject jsonObject = dataResult.getT();
+                                            String code = jsonObject.get("code").toString().replace("\"", "");
+                                            String message = jsonObject.get("message").toString().replace("\"", "");
+                                            if (code.equals("0")){
+                                                ScrapCodeBarcode scrapCodeBarcode = new ScrapCodeBarcode(uuid, pcigCode, picgname, result, scantime,scancode);
+                                                scrapCodeBarcode.setSubmit(true);
+                                                scrapCodeBarcode.saveOrUpdate("barcode = ?", result);
+                                                Toast.makeText(ScrapCodeDetailActivity.this, message, Toast.LENGTH_SHORT).show();
+                                            }else {
+                                                Toast.makeText(ScrapCodeDetailActivity.this, message, Toast.LENGTH_SHORT).show();
+                                            }
+                                        }else if (errcode == -1){
+                                            Toast.makeText(ScrapCodeDetailActivity.this, "网络异常", Toast.LENGTH_SHORT).show();
+                                        }
+                                    }
+                                });
+                                break;
+                            }else {
+                                count++;
+                            }
+                        }
+                        if (count == detailList2.size()){
+                            playSound(2);
+                            sendErrorCode(result);
+                            Toast.makeText(this, "条码不符", Toast.LENGTH_LONG).show();
+                            return;
+                        }
+                        detailList2.clear();
+                        detailList2 = LitePal.where("BD_BB_UUID = ?", uuid).find(ScrapCodeDetail.class);
+                        detailList.clear();
+                        detailList.addAll(detailList2);
+                        String pum = detailList2.get(0).getBD_BILL_PNUM();
+                        String scanNum = detailList2.get(0).getBD_SCAN_NUM();
+                        int unscanNum = Integer.parseInt(pum) - Integer.parseInt(scanNum);
+                        binding.scanedTotalTv.setText(pum);
+                        binding.unscanTotalTv.setText(unscanNum+"");
+                        binding.scanedTotalTv.setText(scanNum);
+
+                        adapter.notifyDataSetChanged();
+                    }
                 } else if (bundle.getInt(XQRCode.RESULT_TYPE) == XQRCode.RESULT_FAILED) {
                     playSound(2);
                     Toast.makeText(this, "解析二维码失败", Toast.LENGTH_LONG).show();

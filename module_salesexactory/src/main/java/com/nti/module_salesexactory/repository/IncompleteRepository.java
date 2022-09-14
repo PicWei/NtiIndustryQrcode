@@ -155,8 +155,10 @@ public class IncompleteRepository {
                                     }
                                     String PDA_SCANNER_IS_END = object.get("PDA_SCANNER_IS_END").toString().replace("\"", "");
                                     String BB_STATE = object.get("BB_STATE").toString().replace("\"", "");
+                                    String A_NO = object.get("A_NO").toString().replace("\"", "");
                                     SalesFactoryOrderInfo orderInfo = new SalesFactoryOrderInfo(BB_UUID, BB_CONTRACT_NO, BB_BT_CODE, BB_TICKET_NO, BB_WS_CODE,
                                             BB_RELATE_CONTRACT_NO, B_NAME, BB_INPUT_DATE, BB_TOTAL_ALL_NUM1, BB_TOTAL_SCAN_NUM, BB_TOTAL_PNUM, BB_FLOW_NAME, BB_STATE, PDA_SCANNER_IS_END);
+                                    orderInfo.setA_NO(A_NO);
                                     orderInfos.add(orderInfo);
                                 }catch (Exception e){
                                     e.printStackTrace();

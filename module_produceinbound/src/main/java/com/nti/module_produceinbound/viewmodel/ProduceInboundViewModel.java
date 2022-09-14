@@ -8,6 +8,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.google.gson.JsonObject;
+import com.nti.lib_common.bean.DataResult;
 import com.nti.lib_common.bean.ErrorSignReceiveParamer;
 import com.nti.lib_common.bean.Paramer;
 import com.nti.lib_common.bean.UpParamer;
@@ -28,13 +29,13 @@ public class ProduceInboundViewModel extends AndroidViewModel {
     private ProduceInboundRepository repository = new ProduceInboundRepository();
     private MutableLiveData<JsonObject> data;
     private MutableLiveData<JsonObject> data3;
-    private MutableLiveData<List<ProduceInboundOrderInfo>> data2 = new MutableLiveData<>();
+    private MutableLiveData<DataResult<List<ProduceInboundOrderInfo>>> data2 = new MutableLiveData<>();
 
     public ProduceInboundViewModel(@NonNull @NotNull Application application) {
         super(application);
     }
 
-    public MutableLiveData<List<ProduceInboundOrderInfo>> PDA_H(Paramer paramer){
+    public MutableLiveData<DataResult<List<ProduceInboundOrderInfo>>> PDA_H(Paramer paramer){
         data2 = repository.PDA_H(paramer);
         return data2;
     }

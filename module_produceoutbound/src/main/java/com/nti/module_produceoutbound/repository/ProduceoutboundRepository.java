@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.nti.lib_common.bean.DataResult;
 import com.nti.lib_common.bean.ErrorSignReceiveParamer;
 import com.nti.lib_common.bean.Paramer;
 import com.nti.lib_common.bean.UpParamer;
@@ -34,8 +35,8 @@ import io.reactivex.schedulers.Schedulers;
  */
 public class ProduceoutboundRepository {
 
-    public MutableLiveData<List<ProduceoutboundOrderInfo>> PDA_H(Paramer paramer){
-        final MutableLiveData<List<ProduceoutboundOrderInfo>> data = new MutableLiveData<>();
+    public MutableLiveData<DataResult<List<ProduceoutboundOrderInfo>>> PDA_H(Paramer paramer){
+        final MutableLiveData<DataResult<List<ProduceoutboundOrderInfo>>> data = new MutableLiveData<>();
         final List<ProduceoutboundOrderInfo> orderInfos = new ArrayList<>();
         HttpUtils.getInstance().with(IProduceoutboundService.class).PDA_H(paramer)
                 .subscribeOn(Schedulers.io())
@@ -177,7 +178,9 @@ public class ProduceoutboundRepository {
                         try {
                             LitePal.deleteAll(ProduceoutboundOrderInfo.class);
                             LitePal.saveAll(orderInfos);
-                            data.setValue(orderInfos);
+                  //          data.setValue(orderInfos);
+                            DataResult<List<ProduceoutboundOrderInfo>> dataResult = new DataResult<>(0, orderInfos);
+                            data.setValue(dataResult);
                         }catch (Exception e){
                             e.printStackTrace();
                         }
@@ -186,8 +189,8 @@ public class ProduceoutboundRepository {
 
                     @Override
                     public void onError(@NotNull Throwable e) {
-                        Log.i("TAG", "e:" + e.getMessage());
-                        data.setValue(null);
+                        DataResult<List<ProduceoutboundOrderInfo>> dataResult = new DataResult<>(-1, null);
+                        data.setValue(dataResult);
                     }
 
                     @Override

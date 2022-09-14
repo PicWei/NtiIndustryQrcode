@@ -27,17 +27,24 @@ import com.lxj.xpopup.core.BasePopupView;
 import com.lxj.xpopup.interfaces.OnConfirmListener;
 import com.nti.lib_common.activity.BaseActivity;
 import com.nti.lib_common.activity.CustomCaptureActivity;
+import com.nti.lib_common.bean.DataResult;
 import com.nti.lib_common.bean.ErrorBarcode;
 import com.nti.lib_common.bean.ErrorBarcodeParamer;
 import com.nti.lib_common.bean.ErrorSignReceiveParamer;
 import com.nti.lib_common.bean.MessageEvent;
+import com.nti.lib_common.bean.SalesBarcodeParamer;
+import com.nti.lib_common.bean.SalesOrderParamer;
+import com.nti.lib_common.bean.SellBarcodeReciveParamer;
+import com.nti.lib_common.bean.SellParamer;
 import com.nti.lib_common.bean.UpParamer;
 import com.nti.lib_common.bean.UpdataStatuesParamer;
+import com.nti.lib_common.bean.UploadSellParamer;
 import com.nti.lib_common.constants.ARouterPath;
 import com.nti.lib_common.constants.BusinessType;
 import com.nti.lib_common.utils.DateUtil;
 import com.nti.lib_common.utils.DeviceUtils;
 import com.nti.lib_common.view.BarcodeListPopup;
+import com.nti.lib_common.viewmodel.SellBarcodeReciveViewModel;
 import com.nti.module_produceoutbound.R;
 import com.nti.module_produceoutbound.adapter.ProduceoutboundDetailAdapter;
 import com.nti.module_produceoutbound.bean.ProduceoutboundBarcode;
@@ -76,6 +83,7 @@ public class ProduceoutboundDetailActivity extends BaseActivity implements View.
     private float volumnRatio;
     private String BI_SCANNER_CODE;
     private ProduceoutboundViewModel viewModel;
+    private SellBarcodeReciveViewModel viewModel3;
     private String A_NO;
 
     /**
@@ -109,6 +117,7 @@ public class ProduceoutboundDetailActivity extends BaseActivity implements View.
         binding.orderTv.setText(contractNo);
         binding.inflowTv.setText(flowName);
         viewModel = new ViewModelProvider(this).get(ProduceoutboundViewModel.class);
+        viewModel3 = new ViewModelProvider(this).get(SellBarcodeReciveViewModel.class);
         List<ProduceoutboundOrderInfo> infos = LitePal.where("BB_UUID = ?", uuid).find(ProduceoutboundOrderInfo.class);
         A_NO = infos.get(0).getA_NO();
     }
@@ -278,37 +287,43 @@ public class ProduceoutboundDetailActivity extends BaseActivity implements View.
                     String result = bundle.getString(XQRCode.RESULT_DATA);
                     if (result.length() != 32){
                         playSound(2);
+                        sendErrorCode(result);
                         Toast.makeText(this, "条码格式错误", Toast.LENGTH_LONG).show();
                         return;
                     }else {
                         if (!result.startsWith("91")){
                             playSound(2);
+                            sendErrorCode(result);
                             Toast.makeText(this, "条码格式错误", Toast.LENGTH_LONG).show();
                             return;
                         }
                         String type = result.substring(22, 23);
                         if (!type.equals("1") && !type.equals("2") && !type.equals("3") && !type.equals("4")){
                             playSound(2);
+                            sendErrorCode(result);
                             Toast.makeText(this, "条码经营方式未知", Toast.LENGTH_LONG).show();
                             return;
                         }
                         String date = result.substring(16, 22);
                         if (!DateUtil.isValidDate(date)){
                             playSound(2);
+                            sendErrorCode(result);
                             Toast.makeText(this, "条码日期无效", Toast.LENGTH_LONG).show();
                             return;
                         }
                         String unitcode = result.substring(8, 16);
                         if (!unitcode.equals(A_NO)){
                             playSound(2);
+                            sendErrorCode(result);
                             Toast.makeText(this, "生产厂家与当前单位不一致", Toast.LENGTH_LONG).show();
                             return;
                         }
                         int count = 0;
                         List<ProduceoutboundBarcode> barcodes = LitePal.where("barcode = ?", result).find(ProduceoutboundBarcode.class);
+                        List<SalesOrderParamer> paramers = new ArrayList<>();
                         if (barcodes.size() > 0){
                             playSound(2);
-                            //             sendErrorCode(result);
+                            sendErrorCode(result);
                             Toast.makeText(this, "此条码已扫过", Toast.LENGTH_LONG).show();
                             return;
                         }
@@ -338,7 +353,7 @@ public class ProduceoutboundDetailActivity extends BaseActivity implements View.
                                 }
                                 if (mscanQty > mPlanqty){
                                     playSound(2);
-                                    //                    sendErrorCode(result);
+                                    sendErrorCode(result);
                                     Toast.makeText(this, "扫描量大于计划量", Toast.LENGTH_SHORT).show();
                                     return;
                                 }
@@ -363,6 +378,47 @@ public class ProduceoutboundDetailActivity extends BaseActivity implements View.
                                 binding.scanTotalTv.setText(pum);
                                 binding.unscanTotalTv.setText(unscannum+"");
                                 binding.scanedTotalTv.setText(scannum+"");
+
+                                List<SalesBarcodeParamer> salesBarcodeParamers = new ArrayList<>();
+                                String BI_FEEDBACK_TIME = format.format(new Date());
+                                SalesBarcodeParamer salesBarcodeParamer = new SalesBarcodeParamer(result, scantime, BI_FEEDBACK_TIME);
+                                salesBarcodeParamer.setBI_SCANNER_CODE(BI_SCANNER_CODE);
+                                salesBarcodeParamer.setBI_SERIAL_NO("");
+                                salesBarcodeParamer.setBI_LOCAL_SCAN_DATE(scantime);
+                                salesBarcodeParamer.setBI_PACK_ID("");
+                                salesBarcodeParamers.add(salesBarcodeParamer);
+                                int mscanqty = salesBarcodeParamers.size();
+                                SalesOrderParamer salesOrderParamer = new SalesOrderParamer(mPlanqty, pcigCode, mscanqty, salesBarcodeParamers);
+                                paramers.add(salesOrderParamer);
+                                SellParamer sellParamer = new SellParamer(uuid, paramers);
+                                List<SellParamer> sellParamers = new ArrayList<>();
+                                sellParamers.add(sellParamer);
+                                String SYSTEM_SERV = "INDUT_COOPERATIVE_RETURN";
+                                UploadSellParamer uploadSellParamer = new UploadSellParamer(sellParamers, SYSTEM_SERV);
+                                SellBarcodeReciveParamer paramer = new SellBarcodeReciveParamer(uploadSellParamer);
+                                Log.i("TAG", "paramer:" + paramer.toString());
+                                viewModel3.sellBarcodeRecive(paramer).observe(this, new Observer<DataResult<JsonObject>>() {
+                                    @Override
+                                    public void onChanged(DataResult<JsonObject> dataResult) {
+                                        Log.i("TAG", "dataResult:" + dataResult.toString());
+                                        int errcode = dataResult.getErrcode();
+                                        if (errcode == 0){
+                                            JsonObject jsonObject = dataResult.getT();
+                                            String code = jsonObject.get("code").toString().replace("\"", "");
+                                            String message = jsonObject.get("message").toString().replace("\"", "");
+                                            if (code.equals("0")){
+                                                ProduceoutboundBarcode produceoutboundBarcode = new ProduceoutboundBarcode(uuid, pcigCode, picgname, result, scantime,scancode);
+                                                salesBarcode.setSubmit(true);
+                                                salesBarcode.saveOrUpdate("barcode = ?", result);
+                                                Toast.makeText(ProduceoutboundDetailActivity.this, message, Toast.LENGTH_SHORT).show();
+                                            }else {
+                                                Toast.makeText(ProduceoutboundDetailActivity.this, message, Toast.LENGTH_SHORT).show();
+                                            }
+                                        }else if (errcode == -1){
+                                            Toast.makeText(ProduceoutboundDetailActivity.this, "网络异常", Toast.LENGTH_SHORT).show();
+                                        }
+                                    }
+                                });
                                 break;
                             }else {
                                 count++;
@@ -370,7 +426,7 @@ public class ProduceoutboundDetailActivity extends BaseActivity implements View.
                         }
                         if (count == detailList2.size()){
                             playSound(2);
-                            //sendErrorCode(result);
+                            sendErrorCode(result);
                             Toast.makeText(this, "条码牌号未知", Toast.LENGTH_LONG).show();
                             return;
                         }

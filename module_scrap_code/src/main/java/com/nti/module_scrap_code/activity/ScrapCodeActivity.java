@@ -15,6 +15,7 @@ import com.alibaba.android.arouter.facade.annotation.Route;
 import com.lxj.xpopup.XPopup;
 import com.lxj.xpopup.impl.LoadingPopupView;
 import com.nti.lib_common.activity.BaseActivity;
+import com.nti.lib_common.bean.DataResult;
 import com.nti.lib_common.bean.MessageEvent;
 import com.nti.lib_common.bean.Paramer;
 import com.nti.lib_common.bean.Params;
@@ -71,24 +72,29 @@ public class ScrapCodeActivity extends BaseActivity implements View.OnClickListe
         }else {
             loadingPopup.show();
         }
-        viewModel.PDA_H(paramer).observe(this, new Observer<List<ScrapCodeOrderInfo>>() {
+        viewModel.PDA_H(paramer).observe(this, new Observer<DataResult<List<ScrapCodeOrderInfo>>>() {
             @Override
-            public void onChanged(List<ScrapCodeOrderInfo> ScrapOrderInfos) {
-//                Log.i("TAG", "ScrapOrderInfos:" + ScrapOrderInfos.toString());
+            public void onChanged(DataResult<List<ScrapCodeOrderInfo>> dataResult) {
                 loadingPopup.dismiss();
-                if (ScrapOrderInfos == null){
-                    Toast.makeText(ScrapCodeActivity.this, "数据为空", Toast.LENGTH_SHORT).show();
+                int errcode = dataResult.getErrcode();
+                if (errcode == -1){
+                    Toast.makeText(ScrapCodeActivity.this, "网络异常", Toast.LENGTH_SHORT).show();
                 }else {
-                    binding.incompleteCl.performClick();
-                    List<ScrapCodeOrderInfo> orderInfos = LitePal.where("BB_STATE = ?", "4").find(ScrapCodeOrderInfo.class);
-                    List<ScrapCodeOrderInfo> orderInfos2 = LitePal.where("BB_STATE = ?", "1").find(ScrapCodeOrderInfo.class);
-                    List<ScrapCodeOrderInfo> orderInfos3 = LitePal.where("BB_STATE = ? and PDA_SCANNER_IS_END = ?", "3", "0").find(ScrapCodeOrderInfo.class);
-                    int incompleteNum = orderInfos.size();
-                    int ongoingNum = orderInfos2.size();
-                    int completeNUm = orderInfos3.size();
-                    binding.incompleteNum.setText(incompleteNum+"");
-                    binding.ongoingNum.setText(ongoingNum+"");
-                    binding.completedNum.setText(completeNUm+"");
+                    List<ScrapCodeOrderInfo> scrapCodeOrderInfos = dataResult.getT();
+                    if (scrapCodeOrderInfos == null || scrapCodeOrderInfos.isEmpty()){
+                        Toast.makeText(ScrapCodeActivity.this, "数据为空", Toast.LENGTH_SHORT).show();
+                    }else {
+                        binding.incompleteCl.performClick();
+                        List<ScrapCodeOrderInfo> orderInfos = LitePal.where("BB_STATE = ?", "4").find(ScrapCodeOrderInfo.class);
+                        List<ScrapCodeOrderInfo> orderInfos2 = LitePal.where("BB_STATE = ?", "1").find(ScrapCodeOrderInfo.class);
+                        List<ScrapCodeOrderInfo> orderInfos3 = LitePal.where("BB_STATE = ? and PDA_SCANNER_IS_END = ?", "3", "0").find(ScrapCodeOrderInfo.class);
+                        int incompleteNum = orderInfos.size();
+                        int ongoingNum = orderInfos2.size();
+                        int completeNUm = orderInfos3.size();
+                        binding.incompleteNum.setText(incompleteNum+"");
+                        binding.ongoingNum.setText(ongoingNum+"");
+                        binding.completedNum.setText(completeNUm+"");
+                    }
                 }
             }
         });
@@ -148,23 +154,29 @@ public class ScrapCodeActivity extends BaseActivity implements View.OnClickListe
             }else {
                 loadingPopup.show();
             }
-            viewModel.PDA_H(paramer).observe(this, new Observer<List<ScrapCodeOrderInfo>>() {
+            viewModel.PDA_H(paramer).observe(this, new Observer<DataResult<List<ScrapCodeOrderInfo>>>() {
                 @Override
-                public void onChanged(List<ScrapCodeOrderInfo> ScrapOrderInfos) {
+                public void onChanged(DataResult<List<ScrapCodeOrderInfo>> dataResult) {
                     loadingPopup.dismiss();
-                    if (ScrapOrderInfos == null){
-                        Toast.makeText(ScrapCodeActivity.this, "数据为空", Toast.LENGTH_SHORT).show();
+                    int errcode = dataResult.getErrcode();
+                    if (errcode == -1){
+                        Toast.makeText(ScrapCodeActivity.this, "网络异常", Toast.LENGTH_SHORT).show();
                     }else {
-                        binding.incompleteCl.performClick();
-                        List<ScrapCodeOrderInfo> orderInfos = LitePal.where("BB_STATE = ?", "4").find(ScrapCodeOrderInfo.class);
-                        List<ScrapCodeOrderInfo> orderInfos2 = LitePal.where("BB_STATE = ?", "1").find(ScrapCodeOrderInfo.class);
-                        List<ScrapCodeOrderInfo> orderInfos3 = LitePal.where("BB_STATE = ? and PDA_SCANNER_IS_END = ?", "3", "0").find(ScrapCodeOrderInfo.class);
-                        int incompleteNum = orderInfos.size();
-                        int ongoingNum = orderInfos2.size();
-                        int completeNUm = orderInfos3.size();
-                        binding.incompleteNum.setText(incompleteNum+"");
-                        binding.ongoingNum.setText(ongoingNum+"");
-                        binding.completedNum.setText(completeNUm+"");
+                        List<ScrapCodeOrderInfo> scrapCodeOrderInfos = dataResult.getT();
+                        if (scrapCodeOrderInfos == null || scrapCodeOrderInfos.isEmpty()){
+                            Toast.makeText(ScrapCodeActivity.this, "数据为空", Toast.LENGTH_SHORT).show();
+                        }else {
+                            binding.incompleteCl.performClick();
+                            List<ScrapCodeOrderInfo> orderInfos = LitePal.where("BB_STATE = ?", "4").find(ScrapCodeOrderInfo.class);
+                            List<ScrapCodeOrderInfo> orderInfos2 = LitePal.where("BB_STATE = ?", "1").find(ScrapCodeOrderInfo.class);
+                            List<ScrapCodeOrderInfo> orderInfos3 = LitePal.where("BB_STATE = ? and PDA_SCANNER_IS_END = ?", "3", "0").find(ScrapCodeOrderInfo.class);
+                            int incompleteNum = orderInfos.size();
+                            int ongoingNum = orderInfos2.size();
+                            int completeNUm = orderInfos3.size();
+                            binding.incompleteNum.setText(incompleteNum+"");
+                            binding.ongoingNum.setText(ongoingNum+"");
+                            binding.completedNum.setText(completeNUm+"");
+                        }
                     }
                 }
             });

@@ -8,6 +8,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.google.gson.JsonObject;
+import com.nti.lib_common.bean.DataResult;
 import com.nti.module_returninbound.bean.ErrorSignReceiveParamer;
 import com.nti.module_returninbound.bean.Paramer;
 import com.nti.module_returninbound.bean.ReturnInboundOrderInfo;
@@ -28,13 +29,13 @@ public class ReturnInboundViewModel extends AndroidViewModel {
     private ReturnInboundRepository repository = new ReturnInboundRepository();
     private MutableLiveData<JsonObject> data;
     private MutableLiveData<JsonObject> data3;
-    private MutableLiveData<List<ReturnInboundOrderInfo>> data2 = new MutableLiveData<>();
+    private MutableLiveData<DataResult<List<ReturnInboundOrderInfo>>> data2 = new MutableLiveData<>();
 
     public ReturnInboundViewModel(@NonNull @NotNull Application application) {
         super(application);
     }
 
-    public MutableLiveData<List<ReturnInboundOrderInfo>> PDA_H(Paramer paramer){
+    public MutableLiveData<DataResult<List<ReturnInboundOrderInfo>>> PDA_H(Paramer paramer){
         data2 = repository.PDA_H(paramer);
         return data2;
     }
