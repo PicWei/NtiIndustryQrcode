@@ -4,6 +4,7 @@ package com.nti.module_version.activity;
 import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -145,6 +146,8 @@ public class VersionActivity extends BaseActivity implements View.OnClickListene
                     new Thread() {
                         @Override
                         public void run() {
+
+
                             try {
                                 getFileFromServer(VersionActivity.this,
                                         "http://10.1.5.179:8080/ApkUpdate/dsmapp.apk", pd);
@@ -169,7 +172,13 @@ public class VersionActivity extends BaseActivity implements View.OnClickListene
     }
 
     public static File getFileFromServer(Context context, String path, ProgressDialog pd) throws Exception {
-        File file = new File(Environment.getExternalStorageDirectory(), "dsmapp.apk");
+
+
+        ContextWrapper cw = new ContextWrapper(context.getApplicationContext());
+        File directory = cw.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+        File file = new File(directory, "dsmapp.apk");
+
+
         //如果相等的话表示当前的sdcard挂载在手机上并且是可用的
         if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
             OkHttpClient okHttpClient = getOkHttpClient();
