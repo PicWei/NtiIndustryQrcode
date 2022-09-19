@@ -3,9 +3,9 @@ package com.nti.module_salesexactory.repository;
 import androidx.lifecycle.MutableLiveData;
 
 import com.google.gson.JsonObject;
+import com.nti.lib_common.utils.HttpUtils;
 import com.nti.module_salesexactory.bean.ErrorSignReceiveParamer;
 import com.nti.module_salesexactory.service.ISalesFactoryDetailService;
-import com.nti.module_salesexactory.utils.HttpUtils;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -23,7 +23,7 @@ public class SalesFactoryDetailRepository {
 
     public MutableLiveData<JsonObject> errorSignReceive(ErrorSignReceiveParamer paramer){
         final MutableLiveData<JsonObject> data = new MutableLiveData<>();
-        HttpUtils.getInstance().with(ISalesFactoryDetailService.class).errorSignReceive(paramer)
+        HttpUtils.getInstance().with(ISalesFactoryDetailService.class, true).errorSignReceive(paramer)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<JsonObject>() {

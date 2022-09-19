@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.ruffian.library.widget.RConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:background_normal="#EDEEEF"
+    app:corner_radius="10dp">
+
+    <TextView
+        android:id="@+id/tv_title"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:gravity="center"
+        android:textColor="@color/title_color"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="提示" />
+
+    <TextView
+        app:layout_constraintTop_toBottomOf="@+id/tv_title"
+        android:id="@+id/tv_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="10dp"
+        android:layout_marginTop="10dp"
+        android:minHeight="90dp"
+        android:textColor="#4E4E4E"
+        android:textSize="16sp"
+        tools:text="更新内容" />
+
+    <TextView
+        android:background="@drawable/bg_button_cancel"
+        android:id="@+id/tv_cancel"
+        android:layout_width="110dp"
+        android:layout_height="44dp"
+        android:gravity="center"
+        android:textColor="#676767"
+        android:textSize="14sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_content"
+        android:text="取消" />
+
+    <TextView
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_content"
+        android:background="@drawable/bg_button_confirm"
+        android:id="@+id/tv_confirm"
+        android:layout_width="110dp"
+        android:layout_height="44dp"
+        android:gravity="center"
+        android:textColor="@color/white"
+        android:textSize="14sp"
+        android:text="确定" />
+
+
+
+</com.ruffian.library.widget.RConstraintLayout>

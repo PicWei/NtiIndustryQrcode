@@ -36,7 +36,7 @@ public class LossRepository {
     public MutableLiveData<DataResult<List<LossOrderInfo>>> PDA_H(Paramer paramer){
         final MutableLiveData<DataResult<List<LossOrderInfo>>> data = new MutableLiveData<>();
         final List<LossOrderInfo> orderInfos = new ArrayList<>();
-        HttpUtils.getInstance().with(ILossService.class).PDA_H(paramer)
+        HttpUtils.getInstance().with(ILossService.class, true).PDA_H(paramer)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<JsonObject>() {
@@ -196,7 +196,7 @@ public class LossRepository {
 
     public MutableLiveData<JsonObject> updataSellListStatues(UpParamer paramer){
         final MutableLiveData<JsonObject> data = new MutableLiveData<>();
-        HttpUtils.getInstance().with(ILossService.class).updataSellListStatues(paramer)
+        HttpUtils.getInstance().with(ILossService.class, true).updataSellListStatues(paramer)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<JsonObject>() {
@@ -225,7 +225,7 @@ public class LossRepository {
 
     public MutableLiveData<JsonObject> errorSignReceive(ErrorSignReceiveParamer paramer){
         final MutableLiveData<JsonObject> data = new MutableLiveData<>();
-        HttpUtils.getInstance().with(ILossService.class).errorSignReceive(paramer)
+        HttpUtils.getInstance().with(ILossService.class, true).errorSignReceive(paramer)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<JsonObject>() {

@@ -38,7 +38,7 @@ public class MoveoutboundRepository {
     public MutableLiveData<DataResult<List<MoveoutboundOrderInfo>>> PDA_H(Paramer paramer){
         final MutableLiveData<DataResult<List<MoveoutboundOrderInfo>>> data = new MutableLiveData<>();
         final List<MoveoutboundOrderInfo> orderInfos = new ArrayList<>();
-        HttpUtils.getInstance().with(IMoveoutboundService.class).PDA_H(paramer)
+        HttpUtils.getInstance().with(IMoveoutboundService.class, true).PDA_H(paramer)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<JsonObject>() {
@@ -198,7 +198,7 @@ public class MoveoutboundRepository {
 
     public MutableLiveData<JsonObject> updataSellListStatues(UpParamer paramer){
         final MutableLiveData<JsonObject> data = new MutableLiveData<>();
-        HttpUtils.getInstance().with(IMoveoutboundService.class).updataSellListStatues(paramer)
+        HttpUtils.getInstance().with(IMoveoutboundService.class, true).updataSellListStatues(paramer)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<JsonObject>() {
@@ -227,7 +227,7 @@ public class MoveoutboundRepository {
 
     public MutableLiveData<JsonObject> errorSignReceive(ErrorSignReceiveParamer paramer){
         final MutableLiveData<JsonObject> data = new MutableLiveData<>();
-        HttpUtils.getInstance().with(IMoveoutboundService.class).errorSignReceive(paramer)
+        HttpUtils.getInstance().with(IMoveoutboundService.class, true).errorSignReceive(paramer)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<JsonObject>() {

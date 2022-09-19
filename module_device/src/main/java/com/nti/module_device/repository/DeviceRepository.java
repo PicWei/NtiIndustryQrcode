@@ -25,7 +25,7 @@ import io.reactivex.schedulers.Schedulers;
 public class DeviceRepository {
     public MutableLiveData<DataResult<JsonObject>> register (PdaRegisterParamer paramer){
         final MutableLiveData<DataResult<JsonObject>> data = new MutableLiveData<>();
-        HttpUtils.getInstance().with(IDeviceServie.class).register(paramer)
+        HttpUtils.getInstance().with(IDeviceServie.class, true).register(paramer)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<JsonObject>() {

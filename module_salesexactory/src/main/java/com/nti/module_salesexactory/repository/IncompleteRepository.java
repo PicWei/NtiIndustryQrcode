@@ -8,13 +8,13 @@ import androidx.lifecycle.MutableLiveData;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.nti.lib_common.bean.DataResult;
+import com.nti.lib_common.utils.HttpUtils;
 import com.nti.module_salesexactory.bean.Paramer;
 import com.nti.module_salesexactory.bean.SalesBarcode;
 import com.nti.module_salesexactory.bean.SalesFactoryDetail;
 import com.nti.module_salesexactory.bean.SalesFactoryOrderInfo;
 import com.nti.module_salesexactory.bean.UpParamer;
 import com.nti.module_salesexactory.service.IncompleteService;
-import com.nti.module_salesexactory.utils.HttpUtils;
 
 import org.jetbrains.annotations.NotNull;
 import org.litepal.LitePal;
@@ -36,7 +36,7 @@ public class IncompleteRepository {
     public MutableLiveData<DataResult<List<SalesFactoryOrderInfo>>> PDA_H(Paramer paramer){
         final MutableLiveData<DataResult<List<SalesFactoryOrderInfo>>> data = new MutableLiveData<>();
         final List<SalesFactoryOrderInfo> orderInfos = new ArrayList<>();
-        HttpUtils.getInstance().with(IncompleteService.class).PDA_H(paramer)
+        HttpUtils.getInstance().with(IncompleteService.class, true).PDA_H(paramer)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<JsonObject>() {
@@ -196,7 +196,7 @@ public class IncompleteRepository {
 
     public MutableLiveData<JsonObject> updataSellListStatues(UpParamer paramer){
         final MutableLiveData<JsonObject> data = new MutableLiveData<>();
-        HttpUtils.getInstance().with(IncompleteService.class).updataSellListStatues(paramer)
+        HttpUtils.getInstance().with(IncompleteService.class, true).updataSellListStatues(paramer)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<JsonObject>() {

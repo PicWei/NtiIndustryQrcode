@@ -29,7 +29,7 @@ public class SellBarcodeReciveRepository {
     public MutableLiveData<DataResult<JsonObject>> sellBarcodeRecive(SellBarcodeReciveParamer paramer){
         final MutableLiveData<DataResult<JsonObject>> data = new MutableLiveData<>();
 
-        HttpUtils.getInstance().with(ISellBarcodeReciveService.class).sellBarcodeRecive(paramer)
+        HttpUtils.getInstance().with(ISellBarcodeReciveService.class, true).sellBarcodeRecive(paramer)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<JsonObject>() {
