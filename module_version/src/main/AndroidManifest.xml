@@ -3,6 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.nti.module_version">
 
+
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES"/>
+
     <application>
         <activity android:name=".activity.VersionActivity"
             android:launchMode="singleTask"
