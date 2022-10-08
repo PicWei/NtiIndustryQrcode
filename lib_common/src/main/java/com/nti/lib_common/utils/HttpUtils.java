@@ -60,11 +60,12 @@ public class HttpUtils {
         try {
             SSLContext sslContext = SSLContext.getInstance("SSL");
             sslContext.init(null, new TrustManager[]{trustManager}, new SecureRandom());
-            if (iscer){
+//            if (iscer){
                 mBuilder = new OkHttpClient.Builder()
                         .connectTimeout(30, TimeUnit.SECONDS)
                         .writeTimeout(30, TimeUnit.SECONDS)
                         .readTimeout(30, TimeUnit.SECONDS)
+                        .addInterceptor(interceptor)
                         .connectionSpecs(Arrays.asList(ConnectionSpec.MODERN_TLS, ConnectionSpec.COMPATIBLE_TLS))
                         .sslSocketFactory(sslContext.getSocketFactory(), trustManager)
                         .hostnameVerifier((s, sslSession) -> true);
@@ -73,17 +74,18 @@ public class HttpUtils {
                         .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                         .addConverterFactory(GsonConverterFactory.create())
                         .baseUrl("https://it.nti56.com").build();
-            }else {
-                mBuilder = new OkHttpClient.Builder()
-                        .connectTimeout(60, TimeUnit.SECONDS)
-                        .writeTimeout(60, TimeUnit.SECONDS)
-                        .readTimeout(60, TimeUnit.SECONDS);
-                retrofit = new Retrofit.Builder()
-                        .client(mBuilder.build())
-                        .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-                        .addConverterFactory(GsonConverterFactory.create())
-                        .baseUrl("http://10.1.5.179:8080").build();
-            }
+//            }
+//            else {
+//                mBuilder = new OkHttpClient.Builder()
+//                        .connectTimeout(60, TimeUnit.SECONDS)
+//                        .writeTimeout(60, TimeUnit.SECONDS)
+//                        .readTimeout(60, TimeUnit.SECONDS);
+//                retrofit = new Retrofit.Builder()
+//                        .client(mBuilder.build())
+//                        .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+//                        .addConverterFactory(GsonConverterFactory.create())
+//                        .baseUrl("http://10.1.5.179:8080").build();
+//            }
         }catch (Exception e){
             e.printStackTrace();
         }

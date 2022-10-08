@@ -56,6 +56,7 @@ public class DeviceActivity extends BaseActivity {
         sp = getSharedPreferences("PDA_ACCOUNT", 0);
         editor = sp.edit();
         String devidename = sp.getString("pdaname", "");
+
         ARouter.getInstance().inject(this);
         viewModel = new ViewModelProvider(this).get(DeviceViewModel.class);
         if (flag){
@@ -111,8 +112,9 @@ public class DeviceActivity extends BaseActivity {
         }
         String deviceModel = DeviceUtils.getModel();
         binding.deviceModelTv.setText(deviceModel);
-        String ip = getLocalIpAddress(this);
-        String mac = getNewMac();
+
+        String ip = DeviceUtils.getLocalIpAddress(this);
+        String mac = DeviceUtils.getNewMac();
         binding.ipAddressTv.setText(ip);
         binding.macAddressTv.setText(mac);
         binding.confirmBtn.setOnClickListener(new View.OnClickListener() {
@@ -125,6 +127,12 @@ public class DeviceActivity extends BaseActivity {
                 viewModel.register(paramer).observe(DeviceActivity.this, new Observer<DataResult<JsonObject>>() {
                     @Override
                     public void onChanged(DataResult<JsonObject> dataResult) {
+                        if (dataResult == null){
+                            Toast.makeText(DeviceActivity.this, "网络异常", Toast.LENGTH_SHORT).show();
+                            return;
+
+                        }
+
                         int errcode = dataResult.getErrcode();
                         if (errcode == 0){
                             JsonObject jsonObject = dataResult.getT();
@@ -147,60 +155,5 @@ public class DeviceActivity extends BaseActivity {
 
     }
 
-    public static String int2ip(int ipInt) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(ipInt & 0xFF).append(".");
-        sb.append((ipInt >> 8) & 0xFF).append(".");
-        sb.append((ipInt >> 16) & 0xFF).append(".");
-        sb.append((ipInt >> 24) & 0xFF);
-        return sb.toString();
-    }
-
-    /**
-     * 获取当前ip地址
-     *
-     * @param context
-     * @return
-     */
-    public static String getLocalIpAddress(Context context) {
-        try {
-
-            WifiManager wifiManager = (WifiManager) context
-                    .getSystemService(Context.WIFI_SERVICE);
-            WifiInfo wifiInfo = wifiManager.getConnectionInfo();
-            int i = wifiInfo.getIpAddress();
-            return int2ip(i);
-        } catch (Exception ex) {
-            return " 获取IP出错鸟!!!!请保证是WIFI,或者请重新打开网络!\n" + ex.getMessage();
-        }
-        // return null;
-    }
-
-    private static String getNewMac() {
-        try {
-            List<NetworkInterface> all = Collections.list(NetworkInterface.getNetworkInterfaces());
-            for (NetworkInterface nif : all) {
-                if (!nif.getName().equalsIgnoreCase("wlan0")) continue;
-
-                byte[] macBytes = nif.getHardwareAddress();
-                if (macBytes == null) {
-                    return null;
-                }
-
-                StringBuilder res1 = new StringBuilder();
-                for (byte b : macBytes) {
-                    res1.append(String.format("%02X:", b));
-                }
-
-                if (res1.length() > 0) {
-                    res1.deleteCharAt(res1.length() - 1);
-                }
-                return res1.toString();
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        return null;
-    }
 
 }

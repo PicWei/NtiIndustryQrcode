@@ -7,7 +7,9 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.media.SoundPool;
@@ -89,6 +91,9 @@ public class SalesFactoryDetailActivity extends BaseActivity implements View.OnC
     private SellBarcodeReciveViewModel viewModel3;
     private String A_NO;
 
+    public static final  String BROADCAST_ACTION = "com.scanner.broadcast";
+
+    private ScannerBroascast scannerBroadcast;
 
     /**
      * 扫描跳转Activity RequestCode
@@ -125,6 +130,16 @@ public class SalesFactoryDetailActivity extends BaseActivity implements View.OnC
         viewModel3 = new ViewModelProvider(this).get(SellBarcodeReciveViewModel.class);
         List<SalesFactoryOrderInfo> infos = LitePal.where("BB_UUID = ?", uuid).find(SalesFactoryOrderInfo.class);
         A_NO = infos.get(0).getA_NO();
+        initRegister();
+    }
+
+    private void initRegister(){
+        scannerBroadcast = new ScannerBroascast();
+        IntentFilter intentFilter = new IntentFilter();
+        // 2. 设置接收广播的类型
+        intentFilter.addAction(BROADCAST_ACTION);// 只有持有相同的action的接受者才能接收此广播
+        // 3. 动态注册：调用Context的registerReceiver（）方法
+        registerReceiver(locatiopnBroadcast, intentFilter);
     }
 
     @Override
@@ -520,6 +535,29 @@ public class SalesFactoryDetailActivity extends BaseActivity implements View.OnC
         }
     }
 
+
+
+
+
+    public class ScannerBroascast extends BroadcastReceiver{
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent != null) {
+
+                Bundle bundle = intent.getExtras();
+                if (bundle != null) {
+
+                    String result = bundle.getString("data");
+
+                    if (!TextUtils.isEmpty(result)) {
+                        Log.i("ccc",result);
+                    }
+                }
+            }
+
+        }
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -528,6 +566,9 @@ public class SalesFactoryDetailActivity extends BaseActivity implements View.OnC
         detailList.clear();
         if (soundPool != null){
             soundPool.release();
+        }
+        if (scannerBroadcast != null){
+            unregisterReceiver(scannerBroadcast);
         }
     }
 }
