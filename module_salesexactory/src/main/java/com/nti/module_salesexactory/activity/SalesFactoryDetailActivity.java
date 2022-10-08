@@ -11,6 +11,7 @@ import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.media.SoundPool;
 import android.os.Bundle;
@@ -139,7 +140,7 @@ public class SalesFactoryDetailActivity extends BaseActivity implements View.OnC
         // 2. 设置接收广播的类型
         intentFilter.addAction(BROADCAST_ACTION);// 只有持有相同的action的接受者才能接收此广播
         // 3. 动态注册：调用Context的registerReceiver（）方法
-        registerReceiver(locatiopnBroadcast, intentFilter);
+        registerReceiver(scannerBroadcast, intentFilter);
     }
 
     @Override
@@ -294,6 +295,11 @@ public class SalesFactoryDetailActivity extends BaseActivity implements View.OnC
         }
     }
 
+
+
+
+
+
     /**
      * 处理二维码扫描结果
      *
@@ -305,170 +311,179 @@ public class SalesFactoryDetailActivity extends BaseActivity implements View.OnC
             if (bundle != null) {
                 if (bundle.getInt(XQRCode.RESULT_TYPE) == XQRCode.RESULT_SUCCESS) {
                     String result = bundle.getString(XQRCode.RESULT_DATA);
-                    if (result.length() != 32){
-                        playSound(2);
-                        sendErrorCode(result);
-                        Toast.makeText(this, "条码格式错误", Toast.LENGTH_LONG).show();
-                        return;
-                    }else {
-                        if (!result.startsWith("91")){
-                            playSound(2);
-                            sendErrorCode(result);
-                            Toast.makeText(this, "条码格式错误", Toast.LENGTH_LONG).show();
-                            return;
-                        }
-                        String type = result.substring(22, 23);
-                        if (!type.equals("1") && !type.equals("2") && !type.equals("3") && !type.equals("4")){
-                            playSound(2);
-                            sendErrorCode(result);
-                            Toast.makeText(this, "条码经营方式未知", Toast.LENGTH_LONG).show();
-                            return;
-                        }
-                        String date = result.substring(16, 22);
-                        if (!DateUtil.isValidDate(date)){
-                            playSound(2);
-                            sendErrorCode(result);
-                            Toast.makeText(this, "条码日期无效", Toast.LENGTH_LONG).show();
-                            return;
-                        }
-                        String unitcode = result.substring(8, 16);
-                        if (!unitcode.equals(A_NO)){
-                            playSound(2);
-                            sendErrorCode(result);
-                            Toast.makeText(this, "生产厂家与当前单位不一致", Toast.LENGTH_LONG).show();
-                            return;
-                        }
-                        int count = 0;
-                        List<SalesBarcode> barcodes = LitePal.where("barcode = ?", result).find(SalesBarcode.class);
-                        List<SalesOrderParamer> paramers = new ArrayList<>();
-                        if (barcodes.size() > 0){
-                            playSound(2);
-                            sendErrorCode(result);
-                            Toast.makeText(this, "此条码已扫过", Toast.LENGTH_LONG).show();
-                            return;
-                        }
-                        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                        String scantime = format.format(new Date());
-                        for (int i = 0; i < detailList2.size(); i++){
-                            int mPlanqty = 0;
-                            String picgname = detailList2.get(i).getBD_PCIG_NAME();
-                            try {
-                                String planqty = detailList2.get(i).getBD_BILL_PNUM();
-                                mPlanqty = Integer.valueOf(planqty);
-                            }catch (Exception e){
-                                e.printStackTrace();
-                            }
-                            SalesFactoryDetail detail = detailList2.get(i);
-                            String pcigCode = detail.getBD_PCIG_CODE();
-                            String pcigcodesub = pcigCode.substring(7, 13);
-                            String pcigName = detail.getBD_PCIG_NAME();
-                            String code = result.substring(2, 8);
-                            if (pcigcodesub.equals(code)){
-                                String scanQty = detail.getBD_SCAN_NUM();
-                                int mscanQty;
-                                if (TextUtils.isEmpty(scanQty)){
-                                    mscanQty = 1;
-                                }else {
-                                    mscanQty = Integer.valueOf(scanQty) + 1;
-                                }
-                                if (mscanQty > mPlanqty){
-                                    playSound(2);
-                                    sendErrorCode(result);
-                                    Toast.makeText(this, "扫描量大于计划量,暂停扫描", Toast.LENGTH_SHORT).show();
-                                    return;
-                                }
-                                String scancode = DeviceUtils.getDevUUID(this);
-                                SalesBarcode salesBarcode = new SalesBarcode(uuid, pcigCode, pcigName, result, scantime, scancode);
-                                salesBarcode.save();
-                                String new_scanQty = String.valueOf(mscanQty);
-                                ContentValues cv = new ContentValues();
-                                cv.put("BD_SCAN_NUM", new_scanQty);
-                                LitePal.updateAll(SalesFactoryDetail.class, cv, "BD_PCIG_CODE = ?", pcigCode);
-                                ContentValues cv2 = new ContentValues();
-                                List<SalesFactoryOrderInfo> orderInfos = LitePal.where("BB_UUID = ?", uuid).find(SalesFactoryOrderInfo.class);
-                                String pum = orderInfos.get(0).getBB_TOTAL_PNUM();
-                                String BB_TOTAL_SCAN_NUM = orderInfos.get(0).getBB_TOTAL_SCAN_NUM();
-                                int scannum = Integer.parseInt(BB_TOTAL_SCAN_NUM) + 1;
-                                int unscannum = Integer.parseInt(pum) - scannum;
-                                BB_TOTAL_SCAN_NUM = String.valueOf(scannum);
-                                cv2.put("BB_TOTAL_SCAN_NUM", BB_TOTAL_SCAN_NUM);
-                                LitePal.updateAll(SalesFactoryOrderInfo.class, cv2, "BB_UUID = ?", uuid);
-                                binding.brandnameTv.setText(picgname);
-                                binding.barcodeTv.setText(result);
-                                binding.scanTotalTv.setText(pum);
-                                binding.unscanTotalTv.setText(unscannum+"");
-                                binding.scanedTotalTv.setText(scannum+"");
 
-                                List<SalesBarcodeParamer> salesBarcodeParamers = new ArrayList<>();
-                                String BI_FEEDBACK_TIME = format.format(new Date());
-                                SalesBarcodeParamer salesBarcodeParamer = new SalesBarcodeParamer(result, scantime, BI_FEEDBACK_TIME);
-                                salesBarcodeParamer.setBI_SCANNER_CODE(BI_SCANNER_CODE);
-                                salesBarcodeParamer.setBI_SERIAL_NO("");
-                                salesBarcodeParamer.setBI_LOCAL_SCAN_DATE(scantime);
-                                salesBarcodeParamer.setBI_PACK_ID("");
-                                salesBarcodeParamers.add(salesBarcodeParamer);
-                                int mscanqty = salesBarcodeParamers.size();
-                                SalesOrderParamer salesOrderParamer = new SalesOrderParamer(mPlanqty, pcigCode, mscanqty, salesBarcodeParamers);
-                                paramers.add(salesOrderParamer);
-                                SellParamer sellParamer = new SellParamer(uuid, paramers);
-                                List<SellParamer> sellParamers = new ArrayList<>();
-                                sellParamers.add(sellParamer);
-                                String SYSTEM_SERV = "INDUT_SALES_FACTORY";
-                                UploadSellParamer uploadSellParamer = new UploadSellParamer(sellParamers, SYSTEM_SERV);
-                                SellBarcodeReciveParamer paramer = new SellBarcodeReciveParamer(uploadSellParamer);
-                                Log.i("TAG", "paramer:" + paramer.toString());
-                                viewModel3.sellBarcodeRecive(paramer).observe(this, new Observer<DataResult<JsonObject>>() {
-                                    @Override
-                                    public void onChanged(DataResult<JsonObject> dataResult) {
-                                        Log.i("TAG", "dataResult:" + dataResult.toString());
-                                        int errcode = dataResult.getErrcode();
-                                        if (errcode == 0){
-                                            JsonObject jsonObject = dataResult.getT();
-                                            String code = jsonObject.get("code").toString().replace("\"", "");
-                                            String message = jsonObject.get("message").toString().replace("\"", "");
-                                            if (code.equals("0")){
-                                                SalesBarcode salesBarcode = new SalesBarcode(uuid, pcigCode, picgname, result, scantime,scancode);
-                                                salesBarcode.setSubmit(true);
-                                                salesBarcode.saveOrUpdate("barcode = ?", result);
-                                                Toast.makeText(SalesFactoryDetailActivity.this, message, Toast.LENGTH_SHORT).show();
-                                            }else {
-                                                Toast.makeText(SalesFactoryDetailActivity.this, message, Toast.LENGTH_SHORT).show();
-                                            }
-                                        }else if (errcode == -1){
-                                            Toast.makeText(SalesFactoryDetailActivity.this, "网络异常", Toast.LENGTH_SHORT).show();
-                                        }
-                                    }
-                                });
+                    handleScannerResult(result);
 
-                                break;
-                            }else {
-                                count++;
-                            }
-                        }
-                        if (count == detailList2.size()){
-                            playSound(2);
-                            sendErrorCode(result);
-                            Toast.makeText(this, "条码不符", Toast.LENGTH_LONG).show();
-                            return;
-                        }
-                        detailList2.clear();
-                        detailList2 = LitePal.where("BD_BB_UUID = ?", uuid).find(SalesFactoryDetail.class);
-                        detailList.clear();
-                        detailList.addAll(detailList2);
-                        String pum = detailList2.get(0).getBD_BILL_PNUM();
-                        String scanNum = detailList2.get(0).getBD_SCAN_NUM();
-                        int unscanNum = Integer.parseInt(pum) - Integer.parseInt(scanNum);
-                        binding.scanedTotalTv.setText(pum);
-                        binding.unscanTotalTv.setText(unscanNum+"");
-                        binding.scanedTotalTv.setText(scanNum);
-                        adapter.notifyDataSetChanged();
-                    }
+
 
                 } else if (bundle.getInt(XQRCode.RESULT_TYPE) == XQRCode.RESULT_FAILED) {
                     playSound(2);
                     Toast.makeText(this, "解析二维码失败", Toast.LENGTH_LONG).show();
                 }
             }
+        }
+    }
+
+    private void handleScannerResult(String result) {
+
+
+        if (result.length() != 32){
+            playSound(2);
+            sendErrorCode(result);
+            Toast.makeText(this, "条码格式错误", Toast.LENGTH_LONG).show();
+            return;
+        }else {
+            if (!result.startsWith("91")){
+                playSound(2);
+                sendErrorCode(result);
+                Toast.makeText(this, "条码格式错误", Toast.LENGTH_LONG).show();
+                return;
+            }
+            String type = result.substring(22, 23);
+            if (!type.equals("1") && !type.equals("2") && !type.equals("3") && !type.equals("4")){
+                playSound(2);
+                sendErrorCode(result);
+                Toast.makeText(this, "条码经营方式未知", Toast.LENGTH_LONG).show();
+                return;
+            }
+            String date = result.substring(16, 22);
+            if (!DateUtil.isValidDate(date)){
+                playSound(2);
+                sendErrorCode(result);
+                Toast.makeText(this, "条码日期无效", Toast.LENGTH_LONG).show();
+                return;
+            }
+            String unitcode = result.substring(8, 16);
+            if (!unitcode.equals(A_NO)){
+                playSound(2);
+                sendErrorCode(result);
+                Toast.makeText(this, "生产厂家与当前单位不一致", Toast.LENGTH_LONG).show();
+                return;
+            }
+            int count = 0;
+            List<SalesBarcode> barcodes = LitePal.where("barcode = ?", result).find(SalesBarcode.class);
+            List<SalesOrderParamer> paramers = new ArrayList<>();
+            if (barcodes.size() > 0){
+                playSound(2);
+                sendErrorCode(result);
+                Toast.makeText(this, "此条码已扫过", Toast.LENGTH_LONG).show();
+                return;
+            }
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            String scantime = format.format(new Date());
+            for (int i = 0; i < detailList2.size(); i++){
+                int mPlanqty = 0;
+                String picgname = detailList2.get(i).getBD_PCIG_NAME();
+                try {
+                    String planqty = detailList2.get(i).getBD_BILL_PNUM();
+                    mPlanqty = Integer.valueOf(planqty);
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+                SalesFactoryDetail detail = detailList2.get(i);
+                String pcigCode = detail.getBD_PCIG_CODE();
+                String pcigcodesub = pcigCode.substring(7, 13);
+                String pcigName = detail.getBD_PCIG_NAME();
+                String code = result.substring(2, 8);
+                if (pcigcodesub.equals(code)){
+                    String scanQty = detail.getBD_SCAN_NUM();
+                    int mscanQty;
+                    if (TextUtils.isEmpty(scanQty)){
+                        mscanQty = 1;
+                    }else {
+                        mscanQty = Integer.valueOf(scanQty) + 1;
+                    }
+                    if (mscanQty > mPlanqty){
+                        playSound(2);
+                        sendErrorCode(result);
+                        Toast.makeText(this, "扫描量大于计划量,暂停扫描", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    String scancode = DeviceUtils.getDevUUID(this);
+                    SalesBarcode salesBarcode = new SalesBarcode(uuid, pcigCode, pcigName, result, scantime, scancode);
+                    salesBarcode.save();
+                    String new_scanQty = String.valueOf(mscanQty);
+                    ContentValues cv = new ContentValues();
+                    cv.put("BD_SCAN_NUM", new_scanQty);
+                    LitePal.updateAll(SalesFactoryDetail.class, cv, "BD_PCIG_CODE = ?", pcigCode);
+                    ContentValues cv2 = new ContentValues();
+                    List<SalesFactoryOrderInfo> orderInfos = LitePal.where("BB_UUID = ?", uuid).find(SalesFactoryOrderInfo.class);
+                    String pum = orderInfos.get(0).getBB_TOTAL_PNUM();
+                    String BB_TOTAL_SCAN_NUM = orderInfos.get(0).getBB_TOTAL_SCAN_NUM();
+                    int scannum = Integer.parseInt(BB_TOTAL_SCAN_NUM) + 1;
+                    int unscannum = Integer.parseInt(pum) - scannum;
+                    BB_TOTAL_SCAN_NUM = String.valueOf(scannum);
+                    cv2.put("BB_TOTAL_SCAN_NUM", BB_TOTAL_SCAN_NUM);
+                    LitePal.updateAll(SalesFactoryOrderInfo.class, cv2, "BB_UUID = ?", uuid);
+                    binding.brandnameTv.setText(picgname);
+                    binding.barcodeTv.setText(result);
+                    binding.scanTotalTv.setText(pum);
+                    binding.unscanTotalTv.setText(unscannum+"");
+                    binding.scanedTotalTv.setText(scannum+"");
+
+                    List<SalesBarcodeParamer> salesBarcodeParamers = new ArrayList<>();
+                    String BI_FEEDBACK_TIME = format.format(new Date());
+                    SalesBarcodeParamer salesBarcodeParamer = new SalesBarcodeParamer(result, scantime, BI_FEEDBACK_TIME);
+                    salesBarcodeParamer.setBI_SCANNER_CODE(BI_SCANNER_CODE);
+                    salesBarcodeParamer.setBI_SERIAL_NO("");
+                    salesBarcodeParamer.setBI_LOCAL_SCAN_DATE(scantime);
+                    salesBarcodeParamer.setBI_PACK_ID("");
+                    salesBarcodeParamers.add(salesBarcodeParamer);
+                    int mscanqty = salesBarcodeParamers.size();
+                    SalesOrderParamer salesOrderParamer = new SalesOrderParamer(mPlanqty, pcigCode, mscanqty, salesBarcodeParamers);
+                    paramers.add(salesOrderParamer);
+                    SellParamer sellParamer = new SellParamer(uuid, paramers);
+                    List<SellParamer> sellParamers = new ArrayList<>();
+                    sellParamers.add(sellParamer);
+                    String SYSTEM_SERV = "INDUT_SALES_FACTORY";
+                    UploadSellParamer uploadSellParamer = new UploadSellParamer(sellParamers, SYSTEM_SERV);
+                    SellBarcodeReciveParamer paramer = new SellBarcodeReciveParamer(uploadSellParamer);
+                    Log.i("TAG", "paramer:" + paramer.toString());
+                    viewModel3.sellBarcodeRecive(paramer).observe(this, new Observer<DataResult<JsonObject>>() {
+                        @Override
+                        public void onChanged(DataResult<JsonObject> dataResult) {
+                            Log.i("TAG", "dataResult:" + dataResult.toString());
+                            int errcode = dataResult.getErrcode();
+                            if (errcode == 0){
+                                JsonObject jsonObject = dataResult.getT();
+                                String code = jsonObject.get("code").toString().replace("\"", "");
+                                String message = jsonObject.get("message").toString().replace("\"", "");
+                                if (code.equals("0")){
+                                    SalesBarcode salesBarcode = new SalesBarcode(uuid, pcigCode, picgname, result, scantime,scancode);
+                                    salesBarcode.setSubmit(true);
+                                    salesBarcode.saveOrUpdate("barcode = ?", result);
+                                    Toast.makeText(SalesFactoryDetailActivity.this, message, Toast.LENGTH_SHORT).show();
+                                }else {
+                                    Toast.makeText(SalesFactoryDetailActivity.this, message, Toast.LENGTH_SHORT).show();
+                                }
+                            }else if (errcode == -1){
+                                Toast.makeText(SalesFactoryDetailActivity.this, "网络异常", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
+
+                    break;
+                }else {
+                    count++;
+                }
+            }
+            if (count == detailList2.size()){
+                playSound(2);
+                sendErrorCode(result);
+                Toast.makeText(this, "条码不符", Toast.LENGTH_LONG).show();
+                return;
+            }
+            detailList2.clear();
+            detailList2 = LitePal.where("BD_BB_UUID = ?", uuid).find(SalesFactoryDetail.class);
+            detailList.clear();
+            detailList.addAll(detailList2);
+            String pum = detailList2.get(0).getBD_BILL_PNUM();
+            String scanNum = detailList2.get(0).getBD_SCAN_NUM();
+            int unscanNum = Integer.parseInt(pum) - Integer.parseInt(scanNum);
+            binding.scanedTotalTv.setText(pum);
+            binding.unscanTotalTv.setText(unscanNum+"");
+            binding.scanedTotalTv.setText(scanNum);
+            adapter.notifyDataSetChanged();
         }
     }
 
@@ -493,6 +508,8 @@ public class SalesFactoryDetailActivity extends BaseActivity implements View.OnC
             }
         });
     }
+
+
 
     public void playSound(int id) {
         float audioMaxVolumn = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC); // 返回当前AudioManager对象的最大音量值
@@ -545,12 +562,14 @@ public class SalesFactoryDetailActivity extends BaseActivity implements View.OnC
             if (intent != null) {
 
                 Bundle bundle = intent.getExtras();
+
+                
                 if (bundle != null) {
 
                     String result = bundle.getString("data");
 
                     if (!TextUtils.isEmpty(result)) {
-                        Log.i("ccc",result);
+                        handleScannerResult(result);
                     }
                 }
             }

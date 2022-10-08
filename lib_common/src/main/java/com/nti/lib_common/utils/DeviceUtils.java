@@ -5,12 +5,17 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
 
+import java.net.NetworkInterface;
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -187,5 +192,60 @@ public class DeviceUtils {
             }
         }
         return uniqueId;*/
+    }
+    public static String int2ip(int ipInt) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(ipInt & 0xFF).append(".");
+        sb.append((ipInt >> 8) & 0xFF).append(".");
+        sb.append((ipInt >> 16) & 0xFF).append(".");
+        sb.append((ipInt >> 24) & 0xFF);
+        return sb.toString();
+    }
+
+    /**
+     * 获取当前ip地址
+     *
+     * @param context
+     * @return
+     */
+    public static String getLocalIpAddress(Context context) {
+        try {
+
+            WifiManager wifiManager = (WifiManager) context
+                    .getSystemService(Context.WIFI_SERVICE);
+            WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+            int i = wifiInfo.getIpAddress();
+            return int2ip(i);
+        } catch (Exception ex) {
+            return " 获取IP出错鸟!!!!请保证是WIFI,或者请重新打开网络!\n" + ex.getMessage();
+        }
+        // return null;
+    }
+
+    public static String getNewMac() {
+        try {
+            List<NetworkInterface> all = Collections.list(NetworkInterface.getNetworkInterfaces());
+            for (NetworkInterface nif : all) {
+                if (!nif.getName().equalsIgnoreCase("wlan0")) continue;
+
+                byte[] macBytes = nif.getHardwareAddress();
+                if (macBytes == null) {
+                    return null;
+                }
+
+                StringBuilder res1 = new StringBuilder();
+                for (byte b : macBytes) {
+                    res1.append(String.format("%02X:", b));
+                }
+
+                if (res1.length() > 0) {
+                    res1.deleteCharAt(res1.length() - 1);
+                }
+                return res1.toString();
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return null;
     }
 }
