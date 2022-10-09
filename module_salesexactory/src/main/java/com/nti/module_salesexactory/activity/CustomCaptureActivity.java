@@ -129,13 +129,13 @@ public class CustomCaptureActivity extends CaptureActivity implements View.OnCli
 
     @Override
     public void onClick(View v) {
-        if (v.getId() == R.id.iv_back){
+        if (v.getId() == R.id.iv_back) {
             finish();
         }
-        if (v.getId() == R.id.iv_flash_light){
+        if (v.getId() == R.id.iv_flash_light) {
 
         }
-        if (v.getId() == R.id.iv_flash_light1){
+        if (v.getId() == R.id.iv_flash_light1) {
             switchFlashLight();
         }
     }
@@ -150,50 +150,46 @@ public class CustomCaptureActivity extends CaptureActivity implements View.OnCli
      */
     @Override
     protected void handleAnalyzeSuccess(Bitmap bitmap, String result) {
-        if (isAppLink(result)) {
-            openAppLink(this, result);
-        } else if (isWeb(result)) {
-            //   Utils.goWeb(this, result);
-        } else {
-            Intent resultIntent = new Intent();
-            Bundle bundle = new Bundle();
-            bundle.putInt(XQRCode.RESULT_TYPE, XQRCode.RESULT_SUCCESS);
-            bundle.putString(XQRCode.RESULT_DATA, result);
-            resultIntent.putExtras(bundle);
-            setResult(RESULT_OK, resultIntent);
-        }
+
+        Intent resultIntent = new Intent();
+        Bundle bundle = new Bundle();
+        bundle.putInt(XQRCode.RESULT_TYPE, XQRCode.RESULT_SUCCESS);
+        bundle.putString(XQRCode.RESULT_DATA, result);
+        resultIntent.putExtras(bundle);
+        setResult(RESULT_OK, resultIntent);
+
         finish();
     }
 
-    /**
-     * 格式：https://xuexiangjys.club/xpage/transfer?pageName=xxxxx&....
-     * 例子：https://xuexiangjys.club/xpage/transfer?pageName=UserGuide&position=2
-     *
-     * @param url
-     * @return
-     */
-    private boolean isAppLink(String url) {
-        Uri uri = Uri.parse(url);
-        return uri != null
-                && APP_LINK_HOST.equals(uri.getHost())
-                && (url.startsWith("http") || url.startsWith("https"))
-                && url.contains("xpage");
-    }
-
-    private boolean isWeb(String url) {
-        return !StringUtils.isEmpty(url)
-                && (url.startsWith("http") || url.startsWith("https"));
-    }
-
-    private void openAppLink(Context context, String url) {
-        try {
-            Intent intent = new Intent(APP_LINK_ACTION);
-            intent.setData(Uri.parse(url));
-            context.startActivity(intent);
-        } catch (Exception e) {
-            e.printStackTrace();
-            Toast.makeText(CustomCaptureActivity.this, "您所打开的第三方App未安装！", Toast.LENGTH_SHORT).show();
-        }
-    }
+//    /**
+//     * 格式：https://xuexiangjys.club/xpage/transfer?pageName=xxxxx&....
+//     * 例子：https://xuexiangjys.club/xpage/transfer?pageName=UserGuide&position=2
+//     *
+//     * @param url
+//     * @return
+//     */
+//    private boolean isAppLink(String url) {
+//        Uri uri = Uri.parse(url);
+//        return uri != null
+//                && APP_LINK_HOST.equals(uri.getHost())
+//                && (url.startsWith("http") || url.startsWith("https"))
+//                && url.contains("xpage");
+//    }
+//
+//    private boolean isWeb(String url) {
+//        return !StringUtils.isEmpty(url)
+//                && (url.startsWith("http") || url.startsWith("https"));
+//    }
+//
+//    private void openAppLink(Context context, String url) {
+//        try {
+//            Intent intent = new Intent(APP_LINK_ACTION);
+//            intent.setData(Uri.parse(url));
+//            context.startActivity(intent);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            Toast.makeText(CustomCaptureActivity.this, "您所打开的第三方App未安装！", Toast.LENGTH_SHORT).show();
+//        }
+//    }
 
 }

@@ -4,6 +4,8 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="..\:/NtiProject/IndustryQrCode/app/src/main/res/layout/fragment_home.xml" value="0.22" />
+        <entry key="..\:/NtiProject/IndustryQrCode/lib_common/src/main/res/layout/barcode_item.xml" value="0.1816123188405797" />
+        <entry key="..\:/NtiProject/IndustryQrCode/module_salesexactory/src/main/res/layout/activity_sales_factory_detail.xml" value="0.13333333333333333" />
         <entry key="..\:/NtiProject/IndustryQrCode/module_scrap_code/src/main/res/layout/activity_scrap.xml" value="0.1431159420289855" />
         <entry key="..\:/NtiProject/IndustryQrCode/module_scrap_code/src/main/res/layout/activity_scrap_detail.xml" value="0.1431159420289855" />
         <entry key="..\:/NtiProject/IndustryQrCode/module_scrap_code/src/main/res/layout/scrapcompleted_item.xml" value="0.1431159420289855" />

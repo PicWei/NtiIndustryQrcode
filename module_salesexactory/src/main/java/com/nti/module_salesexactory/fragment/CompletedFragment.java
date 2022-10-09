@@ -208,10 +208,10 @@ public class CompletedFragment extends Fragment {
                         Log.i("TAG", "dataResult:" + dataResult.toString());
                         int errcode = dataResult.getErrcode();
                         if (errcode == 0){
-                            JsonObject jsonObject = dataResult.getT();
-                            String code = jsonObject.get("code").toString().replace("\"", "");
-                            String message = jsonObject.get("message").toString().replace("\"", "");
-                            if (code.equals("0")){
+//                            JsonObject jsonObject = dataResult.getT();
+//                            String code = jsonObject.get("code").toString().replace("\"", "");
+//                            String message = jsonObject.get("message").toString().replace("\"", "");
+//                            if (code.equals("0")){
                                 ContentValues cv = new ContentValues();
                                 cv.put("isSubmit", true);
                                 for (int i = 0; i < uuids.size(); i++){
@@ -228,10 +228,8 @@ public class CompletedFragment extends Fragment {
                                         LitePal.deleteAll(SalesBarcode.class, "BB_UUID = ?", uuid);
                                     }
                                 }
-                                Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
-                            }else {
-                                Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
-                            }
+                                Toast.makeText(getActivity(), "成功", Toast.LENGTH_SHORT).show();
+
                         }else if (errcode == -1){
                             Toast.makeText(getActivity(), "网络异常", Toast.LENGTH_SHORT).show();
                         }

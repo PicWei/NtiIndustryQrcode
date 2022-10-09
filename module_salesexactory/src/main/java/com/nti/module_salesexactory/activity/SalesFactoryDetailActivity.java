@@ -1,5 +1,6 @@
 package com.nti.module_salesexactory.activity;
 
+import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -15,6 +16,8 @@ import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.media.SoundPool;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -82,28 +85,61 @@ public class SalesFactoryDetailActivity extends BaseActivity implements View.OnC
 
     private ActivitySalesFactoryDetailBinding binding;
     private SalesFactoryDetailAdapter adapter;
+
     private List<SalesFactoryDetail> detailList = new ArrayList<>();
+
     private List<SalesFactoryDetail> detailList2 = new ArrayList<>();
+
+
+    /**
+     * 音频
+     */
     private SoundPool soundPool;
     HashMap<Integer, Integer> soundMap = new HashMap<Integer, Integer>();
     private AudioManager am;
     private float volumnRatio;
+
     private String BI_SCANNER_CODE;
-    private IncompleteViewModel viewModel2;
-    private SellBarcodeReciveViewModel viewModel3;
+
+    private SalesFactoryDetailViewModel salesFactoryDetailViewModel;
+    //更改状态
+    private IncompleteViewModel incompleteViewModel;
+    //回送
+    private SellBarcodeReciveViewModel sellBarcodeReciveViewModel;
+
+
     private String A_NO;
+
+    private String mScannerResult;
 
     private LoadingPopupView loadingPopup;
 
+
+    /**
+     * PDA扫描枪广播
+     */
     public static final String BROADCAST_ACTION = "com.scanner.broadcast";
 
     private ScannerBroascast scannerBroadcast;
+
+    private Handler mHandler = new Handler(){
+
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what){
+                case 1:
+                    if (!TextUtils.isEmpty(mScannerResult))  handleScannerResult(mScannerResult);
+                    break;
+            }
+        }
+    };
 
     /**
      * 扫描跳转Activity RequestCode
      */
     public static final int REQUEST_CODE = 111;
-    private SalesFactoryDetailViewModel viewModel;
+
 
     @Autowired
     public String contractNo;
@@ -119,6 +155,7 @@ public class SalesFactoryDetailActivity extends BaseActivity implements View.OnC
         EventBus.getDefault().register(this);
         initSound();
         ARouter.getInstance().inject(this);
+
         uuid = getIntent().getStringExtra("uuid");
         BI_SCANNER_CODE = DeviceUtils.getDevUUID(this);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
@@ -129,12 +166,24 @@ public class SalesFactoryDetailActivity extends BaseActivity implements View.OnC
         binding.confirmBrn.setOnClickListener(this);
         binding.orderTv.setText(contractNo);
         binding.inflowTv.setText(flowName);
-        viewModel = new ViewModelProvider(this).get(SalesFactoryDetailViewModel.class);
-        viewModel2 = new ViewModelProvider(this).get(IncompleteViewModel.class);
-        viewModel3 = new ViewModelProvider(this).get(SellBarcodeReciveViewModel.class);
-        List<SalesFactoryOrderInfo> infos = LitePal.where("BB_UUID = ?", uuid).find(SalesFactoryOrderInfo.class);
-        A_NO = infos.get(0).getA_NO();
+
+        salesFactoryDetailViewModel = new ViewModelProvider(this).get(SalesFactoryDetailViewModel.class);
+        incompleteViewModel = new ViewModelProvider(this).get(IncompleteViewModel.class);
+        sellBarcodeReciveViewModel = new ViewModelProvider(this).get(SellBarcodeReciveViewModel.class);
+
+        //最新数据展示
+        loadLatelyData();
+
         initRegister();
+    }
+
+
+
+    private void loadLatelyData() {
+        SalesFactoryOrderInfo info = LitePal.where("BB_UUID = ?", uuid).findFirst(SalesFactoryOrderInfo.class);
+        if (info!=null){
+            A_NO = info.getA_NO();
+        }
     }
 
     private void initRegister() {
@@ -155,15 +204,25 @@ public class SalesFactoryDetailActivity extends BaseActivity implements View.OnC
         if (detailList != null) {
             detailList.clear();
         }
-        List<SalesFactoryOrderInfo> orderInfos = LitePal.where("BB_UUID = ?", uuid).find(SalesFactoryOrderInfo.class);
+
+
+
+       SalesFactoryOrderInfo orderInfo = LitePal.where("BB_UUID = ?", uuid).findFirst(SalesFactoryOrderInfo.class);
+
+       if (orderInfo !=  null){
+           String pum = orderInfo.getBB_TOTAL_PNUM();
+           String scanNum = orderInfo.getBB_TOTAL_SCAN_NUM();
+           int unscanNum = Integer.parseInt(pum) - Integer.parseInt(scanNum);
+           binding.scanTotalTv.setText(pum);
+           binding.unscanTotalTv.setText(unscanNum + "");
+           binding.scanedTotalTv.setText(scanNum);
+       }
+
+
         detailList2 = LitePal.where("BD_BB_UUID = ?", uuid).find(SalesFactoryDetail.class);
-        String pum = orderInfos.get(0).getBB_TOTAL_PNUM();
-        String scanNum = orderInfos.get(0).getBB_TOTAL_SCAN_NUM();
-        int unscanNum = Integer.parseInt(pum) - Integer.parseInt(scanNum);
-        binding.scanTotalTv.setText(pum);
-        binding.unscanTotalTv.setText(unscanNum + "");
-        binding.scanedTotalTv.setText(scanNum);
+
         detailList.addAll(detailList2);
+
         adapter = new SalesFactoryDetailAdapter(detailList, this);
         binding.recyclerView.setAdapter(adapter);
         adapter.setOnItemClickListener(new SalesFactoryDetailAdapter.OnItemClickListener() {
@@ -193,11 +252,21 @@ public class SalesFactoryDetailActivity extends BaseActivity implements View.OnC
             startScan();
         }
         if (view.getId() == R.id.confirm_brn) {
-            List<SalesFactoryOrderInfo> orderInfos = LitePal.where("BB_UUID = ?", uuid).find(SalesFactoryOrderInfo.class);
-            String pum = orderInfos.get(0).getBB_TOTAL_PNUM();
-            String scanednum = orderInfos.get(0).getBB_TOTAL_SCAN_NUM();
-            List<SalesBarcode> barcodes = LitePal.where("UUID = ? and isSubmit = 0", uuid).find(SalesBarcode.class);
-            if (barcodes.size() == 0) {
+
+            SalesFactoryOrderInfo orderInfo = LitePal.where("BB_UUID = ?", uuid).findFirst(SalesFactoryOrderInfo.class);
+
+            String pum = "";
+            String scanednum = "";
+
+            if (orderInfo != null){
+                pum  = orderInfo.getBB_TOTAL_PNUM();
+                scanednum = orderInfo.getBB_TOTAL_SCAN_NUM();
+            }
+
+
+            int barcode_count  = LitePal.where("UUID = ? and isSubmit = 0", uuid).count(SalesBarcode.class);
+
+            if (barcode_count == 0) {
                 BasePopupView popupView = new XPopup.Builder(this)
                         .isDestroyOnDismiss(true)
                         .asConfirm(null, "未扫描条码!", "取消", "确定",
@@ -221,7 +290,7 @@ public class SalesFactoryDetailActivity extends BaseActivity implements View.OnC
                                             String SYSTEM_SERVICE_TYPE = "INDUT_SALES_FACTORY";
                                             UpdataStatuesParamer updataStatuesParamer = new UpdataStatuesParamer(uuid, BB_STATE, SYSTEM_SERVICE_TYPE);
                                             UpParamer upParamer = new UpParamer(updataStatuesParamer);
-                                            viewModel2.updataSellListStatues(upParamer).observe(SalesFactoryDetailActivity.this, new Observer<JsonObject>() {
+                                            incompleteViewModel.updataSellListStatues(upParamer).observe(SalesFactoryDetailActivity.this, new Observer<JsonObject>() {
                                                 @Override
                                                 public void onChanged(JsonObject jsonObject) {
                                                     if (jsonObject == null) {
@@ -229,7 +298,6 @@ public class SalesFactoryDetailActivity extends BaseActivity implements View.OnC
                                                     } else {
                                                         String code = jsonObject.get("code").toString().replace("\"", "");
                                                         if (code.equals("0")) {
-                                                            SalesFactoryOrderInfo orderInfo = orderInfos.get(0);
                                                             orderInfo.setBB_STATE("3");
                                                             orderInfo.saveOrUpdate("BB_UUID = ?", uuid);
                                                             Toast.makeText(SalesFactoryDetailActivity.this, "确认成功", Toast.LENGTH_SHORT).show();
@@ -248,7 +316,7 @@ public class SalesFactoryDetailActivity extends BaseActivity implements View.OnC
                     String SYSTEM_SERVICE_TYPE = "INDUT_SALES_FACTORY";
                     UpdataStatuesParamer updataStatuesParamer = new UpdataStatuesParamer(uuid, BB_STATE, SYSTEM_SERVICE_TYPE);
                     UpParamer upParamer = new UpParamer(updataStatuesParamer);
-                    viewModel2.updataSellListStatues(upParamer).observe(SalesFactoryDetailActivity.this, new Observer<JsonObject>() {
+                    incompleteViewModel.updataSellListStatues(upParamer).observe(SalesFactoryDetailActivity.this, new Observer<JsonObject>() {
                         @Override
                         public void onChanged(JsonObject jsonObject) {
                             if (jsonObject == null) {
@@ -256,7 +324,7 @@ public class SalesFactoryDetailActivity extends BaseActivity implements View.OnC
                             } else {
                                 String code = jsonObject.get("code").toString().replace("\"", "");
                                 if (code.equals("0")) {
-                                    SalesFactoryOrderInfo orderInfo = orderInfos.get(0);
+
                                     orderInfo.setBB_STATE("3");
                                     orderInfo.saveOrUpdate("BB_UUID = ?", uuid);
                                     Toast.makeText(SalesFactoryDetailActivity.this, "确认成功", Toast.LENGTH_SHORT).show();
@@ -310,11 +378,7 @@ public class SalesFactoryDetailActivity extends BaseActivity implements View.OnC
             if (bundle != null) {
                 if (bundle.getInt(XQRCode.RESULT_TYPE) == XQRCode.RESULT_SUCCESS) {
                     String result = bundle.getString(XQRCode.RESULT_DATA);
-
-
                     handleScannerResult(result);
-
-
                 } else if (bundle.getInt(XQRCode.RESULT_TYPE) == XQRCode.RESULT_FAILED) {
                     playSound(2);
                     Toast.makeText(this, "解析二维码失败", Toast.LENGTH_LONG).show();
@@ -449,7 +513,7 @@ public class SalesFactoryDetailActivity extends BaseActivity implements View.OnC
                 } else {
                     loadingPopup.show();
                 }
-                viewModel3.sellBarcodeRecive(paramer).observe(this, new Observer<DataResult<JsonObject>>() {
+                sellBarcodeReciveViewModel.sellBarcodeRecive(paramer).observe(this, new Observer<DataResult<JsonObject>>() {
                     @Override
                     public void onChanged(DataResult<JsonObject> dataResult) {
 
@@ -513,7 +577,7 @@ public class SalesFactoryDetailActivity extends BaseActivity implements View.OnC
         ErrorBarcodeParamer errorBarcodeParamer = new ErrorBarcodeParamer(uuid, SYSTEM_SERVICE_TYPE, errorBarcodes);
         ErrorSignReceiveParamer esrparamer = new ErrorSignReceiveParamer(errorBarcodeParamer);
 
-        viewModel.errorSignReceive(esrparamer).observe(this, new Observer<JsonObject>() {
+        salesFactoryDetailViewModel.errorSignReceive(esrparamer).observe(this, new Observer<JsonObject>() {
             @Override
             public void onChanged(JsonObject jsonObject) {
                 if (jsonObject == null) {
@@ -578,13 +642,13 @@ public class SalesFactoryDetailActivity extends BaseActivity implements View.OnC
 
                 if (bundle != null) {
 
-                    String result = bundle.getString("data");
+                    String result = bundle.getString("data").trim();
 
 
-//                    if (!TextUtils.isEmpty(result)) {
-//                        Log.i("cccc",result);
-//                        handleScannerResult(result);
-//                    }
+                    if (!TextUtils.isEmpty(result)) {
+                        mScannerResult = result;
+                        mHandler.sendEmptyMessage(1);
+                    }
                 }
             }
 

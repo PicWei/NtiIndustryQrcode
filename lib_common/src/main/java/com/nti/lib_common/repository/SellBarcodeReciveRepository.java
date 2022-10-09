@@ -1,23 +1,26 @@
 package com.nti.lib_common.repository;
 
-import android.util.Log;
-
 import androidx.lifecycle.MutableLiveData;
 
 import com.google.gson.JsonObject;
+
 import com.nti.lib_common.bean.DataResult;
+
 import com.nti.lib_common.bean.SellBarcodeReciveParamer;
+
 import com.nti.lib_common.service.ISellBarcodeReciveService;
+
 import com.nti.lib_common.utils.HttpUtils;
+
 
 import org.jetbrains.annotations.NotNull;
 
-import java.net.UnknownHostException;
-import java.util.concurrent.TimeoutException;
-
 import io.reactivex.Observer;
+
 import io.reactivex.android.schedulers.AndroidSchedulers;
+
 import io.reactivex.disposables.Disposable;
+
 import io.reactivex.schedulers.Schedulers;
 
 /**
