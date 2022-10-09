@@ -91,6 +91,9 @@ public class SalesFactoryDetailActivity extends BaseActivity implements View.OnC
     private List<SalesFactoryDetail> detailList2 = new ArrayList<>();
 
 
+    public static final String SYSTEM_SERVICE_TYPE = "INDUT_SALES_FACTORY";
+
+
     /**
      * 音频
      */
@@ -287,7 +290,6 @@ public class SalesFactoryDetailActivity extends BaseActivity implements View.OnC
                                         @Override
                                         public void onConfirm() {
                                             String BB_STATE = "3";
-                                            String SYSTEM_SERVICE_TYPE = "INDUT_SALES_FACTORY";
                                             UpdataStatuesParamer updataStatuesParamer = new UpdataStatuesParamer(uuid, BB_STATE, SYSTEM_SERVICE_TYPE);
                                             UpParamer upParamer = new UpParamer(updataStatuesParamer);
                                             incompleteViewModel.updataSellListStatues(upParamer).observe(SalesFactoryDetailActivity.this, new Observer<JsonObject>() {
@@ -313,7 +315,7 @@ public class SalesFactoryDetailActivity extends BaseActivity implements View.OnC
 
                 } else {
                     String BB_STATE = "3";
-                    String SYSTEM_SERVICE_TYPE = "INDUT_SALES_FACTORY";
+
                     UpdataStatuesParamer updataStatuesParamer = new UpdataStatuesParamer(uuid, BB_STATE, SYSTEM_SERVICE_TYPE);
                     UpParamer upParamer = new UpParamer(updataStatuesParamer);
                     incompleteViewModel.updataSellListStatues(upParamer).observe(SalesFactoryDetailActivity.this, new Observer<JsonObject>() {
@@ -388,7 +390,6 @@ public class SalesFactoryDetailActivity extends BaseActivity implements View.OnC
     }
 
     private void handleScannerResult(String result) {
-
 
         if (result.length() != 32) {
             playSound(2);
@@ -498,8 +499,7 @@ public class SalesFactoryDetailActivity extends BaseActivity implements View.OnC
                 SellParamer sellParamer = new SellParamer(uuid, paramers);
                 List<SellParamer> sellParamers = new ArrayList<>();
                 sellParamers.add(sellParamer);
-                String SYSTEM_SERV = "INDUT_SALES_FACTORY";
-                UploadSellParamer uploadSellParamer = new UploadSellParamer(sellParamers, SYSTEM_SERV);
+                UploadSellParamer uploadSellParamer = new UploadSellParamer(sellParamers, SYSTEM_SERVICE_TYPE);
                 SellBarcodeReciveParamer paramer = new SellBarcodeReciveParamer(uploadSellParamer);
                 Log.i("TAG", "paramer:" + paramer.toString());
 
@@ -573,7 +573,6 @@ public class SalesFactoryDetailActivity extends BaseActivity implements View.OnC
         ErrorBarcode errorBarcode = new ErrorBarcode(barcode, BI_SCANNER_CODE, BI_FEEDBACK_TIME);
         List<ErrorBarcode> errorBarcodes = new ArrayList<>();
         errorBarcodes.add(errorBarcode);
-        String SYSTEM_SERVICE_TYPE = "INDUT_SALES_FACTORY";
         ErrorBarcodeParamer errorBarcodeParamer = new ErrorBarcodeParamer(uuid, SYSTEM_SERVICE_TYPE, errorBarcodes);
         ErrorSignReceiveParamer esrparamer = new ErrorSignReceiveParamer(errorBarcodeParamer);
 
@@ -639,11 +638,9 @@ public class SalesFactoryDetailActivity extends BaseActivity implements View.OnC
 
                 Bundle bundle = intent.getExtras();
 
-
                 if (bundle != null) {
 
                     String result = bundle.getString("data").trim();
-
 
                     if (!TextUtils.isEmpty(result)) {
                         mScannerResult = result;

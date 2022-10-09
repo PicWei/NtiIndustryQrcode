@@ -46,6 +46,7 @@ public class ARouterPath {
     public static final String LOSS_PAT = "/loss/LossActivity";
     //工业仓库损溢详情
     public static final String LOSSDETAIL_PATH = "/loss/LossDetailActivity";
+
     //版本管理
     public static final String VERSION_PATH = "/version/VersionActivity";
 
