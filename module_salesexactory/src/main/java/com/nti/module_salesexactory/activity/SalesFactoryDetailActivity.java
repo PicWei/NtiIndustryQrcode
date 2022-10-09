@@ -186,6 +186,7 @@ public class SalesFactoryDetailActivity extends BaseActivity implements View.OnC
         SalesFactoryOrderInfo info = LitePal.where("BB_UUID = ?", uuid).findFirst(SalesFactoryOrderInfo.class);
         if (info!=null){
             A_NO = info.getA_NO();
+            Log.i("ccc","A_NO" + A_NO);
         }
     }
 

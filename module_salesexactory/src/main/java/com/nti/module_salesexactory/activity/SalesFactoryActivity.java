@@ -40,9 +40,10 @@ public class SalesFactoryActivity extends BaseActivity implements View.OnClickLi
 
     private ActivitySalesFactoryBinding binding;
     private IncompleteViewModel viewModel;
-    private LoadingPopupView loadingPopup;
-    private int current = 1;
 
+    private LoadingPopupView loadingPopup;
+
+    private int current = 1;
 
     public static final String SYSTEM_SERVICE_TYPE = "INDUT_SALES_FACTORY";
 

@@ -45,27 +45,57 @@ public class ScrapActivity extends BaseActivity implements View.OnClickListener 
     private int current = 1;
 
 
+    public static final String SYSTEM_SERVICE_TYPE = "INDUT_OUT_SCRAP";
+
+    String deviceId;
+
+    //未完成
+    private int unFinishCount;
+
+    //进行中
+    private int doingCount;
+
+    //已完成
+    private int finishCount;
+
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_scrap);
         EventBus.getDefault().register(this);
+
+        initListener();
+
+        viewModel = new ViewModelProvider(this).get(ScrapViewModel.class);
+        deviceId = DeviceUtils.getDevUUID(this);
+
+        loadData();
+    }
+
+
+    private void initListener() {
         binding.incompleteCl.setOnClickListener(this);
         binding.ongoingCl.setOnClickListener(this);
         binding.completedCl.setOnClickListener(this);
         binding.titleBar.findViewById(R.id.right_cl).setOnClickListener(this);
-        viewModel = new ViewModelProvider(this).get(ScrapViewModel.class);
-        String deviceId = DeviceUtils.getDevUUID(this);
-        String SYSTEM_SERVICE_TYPE = "INDUT_OUT_SCRAP";
+    }
+
+
+    /**
+     * 请求数据
+     */
+    private void loadData() {
         Params params = new Params(deviceId, SYSTEM_SERVICE_TYPE);
         Paramer paramer = new Paramer(params);
         if (loadingPopup == null) {
-            loadingPopup = (LoadingPopupView)new XPopup.Builder(this)
-                    .dismissOnBackPressed(true)
+            loadingPopup = (LoadingPopupView) new XPopup.Builder(this)
+                    .dismissOnTouchOutside(false)
+                    .dismissOnBackPressed(false)
                     .isLightNavigationBar(true)
                     .asLoading("加载中...")
                     .show();
-        }else {
+        } else {
             loadingPopup.show();
         }
         viewModel.PDA_H(paramer).observe(this, new Observer<DataResult<List<ScrapOrderInfo>>>() {
@@ -73,41 +103,43 @@ public class ScrapActivity extends BaseActivity implements View.OnClickListener 
             public void onChanged(DataResult<List<ScrapOrderInfo>> dataResult) {
                 loadingPopup.dismiss();
                 int errcode = dataResult.getErrcode();
-                if (errcode == -1){
+                if (errcode == -1) {
                     Toast.makeText(ScrapActivity.this, "网络异常", Toast.LENGTH_SHORT).show();
-                }else {
-                    List<ScrapOrderInfo> scrapOrderInfos = dataResult.getT();
-                    if (scrapOrderInfos == null || scrapOrderInfos.isEmpty()){
+                } else if (errcode == 0) {
+                    List<ScrapOrderInfo> salesFactoryOrderInfos = dataResult.getT();
+                    if (salesFactoryOrderInfos == null || salesFactoryOrderInfos.isEmpty()) {
                         Toast.makeText(ScrapActivity.this, "数据为空", Toast.LENGTH_SHORT).show();
-                    }else {
+                    } else {
                         binding.incompleteCl.performClick();
-                        List<ScrapOrderInfo> orderInfos = LitePal.where("BB_STATE = ?", "4").find(ScrapOrderInfo.class);
-                        List<ScrapOrderInfo> orderInfos2 = LitePal.where("BB_STATE = ?", "1").find(ScrapOrderInfo.class);
-                        List<ScrapOrderInfo> orderInfos3 = LitePal.where("BB_STATE = ? and PDA_SCANNER_IS_END = ?", "3", "0").find(ScrapOrderInfo.class);
-                        int incompleteNum = orderInfos.size();
-                        int ongoingNum = orderInfos2.size();
-                        int completeNUm = orderInfos3.size();
-                        binding.incompleteNum.setText(incompleteNum+"");
-                        binding.ongoingNum.setText(ongoingNum+"");
-                        binding.completedNum.setText(completeNUm+"");
+
+                        loadViewCount();
                     }
                 }
             }
         });
+
     }
+
+    /**
+     * 顶部tab数量
+     */
+    private void loadViewCount() {
+        unFinishCount = LitePal.where("BB_STATE = ?", "4").count(ScrapOrderInfo.class);
+        doingCount = LitePal.where("BB_STATE = ?", "1").count(ScrapOrderInfo.class);
+        finishCount = LitePal.where("BB_STATE = ? and PDA_SCANNER_IS_END = ?", "3", "0").count(ScrapOrderInfo.class);
+
+        binding.incompleteNum.setText(unFinishCount + "");
+        binding.ongoingNum.setText(doingCount + "");
+        binding.completedNum.setText(finishCount + "");
+    }
+
 
     @Override
     protected void onStart() {
         super.onStart();
-        List<ScrapOrderInfo> orderInfos = LitePal.where("BB_STATE = ?", "4").find(ScrapOrderInfo.class);
-        List<ScrapOrderInfo> orderInfos2 = LitePal.where("BB_STATE = ?", "1").find(ScrapOrderInfo.class);
-        List<ScrapOrderInfo> orderInfos3 = LitePal.where("BB_STATE = ? and PDA_SCANNER_IS_END = ?", "3", "0").find(ScrapOrderInfo.class);
-        int incompleteNum = orderInfos.size();
-        int ongoingNum = orderInfos2.size();
-        int completeNUm = orderInfos3.size();
-        binding.incompleteNum.setText(incompleteNum+"");
-        binding.ongoingNum.setText(ongoingNum+"");
-        binding.completedNum.setText(completeNUm+"");
+
+        loadViewCount();
+
         if (current == 1){
             binding.incompleteCl.performClick();
         }
@@ -137,45 +169,7 @@ public class ScrapActivity extends BaseActivity implements View.OnClickListener 
             Fragment completedFragment = CompletedFragment.newInstance();
             getSupportFragmentManager().beginTransaction().replace(R.id.container, completedFragment).commit();
         }else if ((view.getId()) == R.id.right_cl){
-            String deviceId = DeviceUtils.getDevUUID(this);
-            String SYSTEM_SERVICE_TYPE = "INDUT_OUT_SCRAP";
-            Params params = new Params(deviceId, SYSTEM_SERVICE_TYPE);
-            Paramer paramer = new Paramer(params);
-            if (loadingPopup == null) {
-                loadingPopup = (LoadingPopupView)new XPopup.Builder(this)
-                        .dismissOnBackPressed(true)
-                        .isLightNavigationBar(true)
-                        .asLoading("加载中...")
-                        .show();
-            }else {
-                loadingPopup.show();
-            }
-            viewModel.PDA_H(paramer).observe(this, new Observer<DataResult<List<ScrapOrderInfo>>>() {
-                @Override
-                public void onChanged(DataResult<List<ScrapOrderInfo>> dataResult) {
-                    loadingPopup.dismiss();
-                    int errcode = dataResult.getErrcode();
-                    if (errcode == -1){
-                        Toast.makeText(ScrapActivity.this, "网络异常", Toast.LENGTH_SHORT).show();
-                    }else {
-                        List<ScrapOrderInfo> scrapOrderInfos = dataResult.getT();
-                        if (scrapOrderInfos == null || scrapOrderInfos.isEmpty()){
-                            Toast.makeText(ScrapActivity.this, "数据为空", Toast.LENGTH_SHORT).show();
-                        }else {
-                            binding.incompleteCl.performClick();
-                            List<ScrapOrderInfo> orderInfos = LitePal.where("BB_STATE = ?", "4").find(ScrapOrderInfo.class);
-                            List<ScrapOrderInfo> orderInfos2 = LitePal.where("BB_STATE = ?", "1").find(ScrapOrderInfo.class);
-                            List<ScrapOrderInfo> orderInfos3 = LitePal.where("BB_STATE = ? and PDA_SCANNER_IS_END = ?", "3", "0").find(ScrapOrderInfo.class);
-                            int incompleteNum = orderInfos.size();
-                            int ongoingNum = orderInfos2.size();
-                            int completeNUm = orderInfos3.size();
-                            binding.incompleteNum.setText(incompleteNum+"");
-                            binding.ongoingNum.setText(ongoingNum+"");
-                            binding.completedNum.setText(completeNUm+"");
-                        }
-                    }
-                }
-            });
+           loadData();
         }
     }
 
@@ -232,9 +226,7 @@ public class ScrapActivity extends BaseActivity implements View.OnClickListener 
     public void onMessageEvent(MessageEvent event){
         switch (event.what){
             case BusinessType.UPDATA_ONGOING:
-                List<ScrapOrderInfo> orderInfos2 = LitePal.where("BB_STATE = ? or BB_STATE = ? or BB_STATE = ?", "1", "3", "4").find(ScrapOrderInfo.class);
-                int ongoingNum = orderInfos2.size();
-                binding.ongoingNum.setText(ongoingNum+"");
+                loadViewCount();
                 break;
         }
     }

@@ -2,16 +2,22 @@ package com.nti.module_scrap.activity;
 
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.media.SoundPool;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -24,6 +30,7 @@ import com.alibaba.android.arouter.launcher.ARouter;
 import com.google.gson.JsonObject;
 import com.lxj.xpopup.XPopup;
 import com.lxj.xpopup.core.BasePopupView;
+import com.lxj.xpopup.impl.LoadingPopupView;
 import com.lxj.xpopup.interfaces.OnConfirmListener;
 import com.nti.lib_common.activity.BaseActivity;
 import com.nti.lib_common.activity.CustomCaptureActivity;
@@ -76,16 +83,53 @@ public class ScrapDetailActivity extends BaseActivity implements View.OnClickLis
 
     private ActivityScrapDetailBinding binding;
     private ScrapDetailAdapter adapter;
+
     private List<ScrapDetail> detailList = new ArrayList<>();
+
     private List<ScrapDetail> detailList2 = new ArrayList<>();
+
+    /**
+     * 音频
+     */
     private SoundPool soundPool;
     HashMap<Integer, Integer> soundMap = new HashMap<Integer, Integer>();
     private AudioManager am;
     private float volumnRatio;
+
+
     private String BI_SCANNER_CODE;
+
+    public static final String SYSTEM_SERVICE_TYPE = "INDUT_OUT_SCRAP";
+
     private ScrapViewModel viewModel;
-    private SellBarcodeReciveViewModel viewModel3;
+    private SellBarcodeReciveViewModel sellBarcodeReciveViewModel;
+
+    private String mScannerResult;
     private String A_NO;
+
+
+    /**
+     * PDA扫描枪广播
+     */
+    public static final String BROADCAST_ACTION = "com.scanner.broadcast";
+
+    private ScannerBroascast scannerBroadcast;
+
+    private Handler mHandler = new Handler(){
+
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what){
+                case 1:
+                    if (!TextUtils.isEmpty(mScannerResult))  handleScannerResult(mScannerResult);
+                    break;
+            }
+        }
+    };
+
+    private LoadingPopupView loadingPopup;
+
 
     /**
      * 扫描跳转Activity RequestCode
@@ -107,6 +151,7 @@ public class ScrapDetailActivity extends BaseActivity implements View.OnClickLis
         initSound();
         ARouter.getInstance().inject(this);
         uuid = getIntent().getStringExtra("uuid");
+
         BI_SCANNER_CODE = DeviceUtils.getDevUUID(this);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
@@ -117,11 +162,34 @@ public class ScrapDetailActivity extends BaseActivity implements View.OnClickLis
         binding.orderTv.setText(contractNo);
         binding.inflowTv.setText(flowName);
         viewModel = new ViewModelProvider(this).get(ScrapViewModel.class);
-        viewModel3 = new ViewModelProvider(this).get(SellBarcodeReciveViewModel.class);
-        List<ScrapOrderInfo> infos = LitePal.where("BB_UUID = ?", uuid).find(ScrapOrderInfo.class);
-        A_NO = infos.get(0).getA_NO();
+        sellBarcodeReciveViewModel = new ViewModelProvider(this).get(SellBarcodeReciveViewModel.class);
+
+        //最新数据展示
+        loadLatelyData();
+
+        initRegister();
     }
 
+
+
+    private void loadLatelyData() {
+        ScrapOrderInfo info = LitePal.where("BB_UUID = ?", uuid).findFirst(ScrapOrderInfo.class);
+        if (info!=null){
+
+            A_NO = info.getA_NO();
+
+            Log.i("ccc","A_NO" + A_NO);
+        }
+    }
+
+    private void initRegister() {
+        scannerBroadcast = new ScannerBroascast();
+        IntentFilter intentFilter = new IntentFilter();
+        // 2. 设置接收广播的类型
+        intentFilter.addAction(BROADCAST_ACTION);// 只有持有相同的action的接受者才能接收此广播
+        // 3. 动态注册：调用Context的registerReceiver（）方法
+        registerReceiver(scannerBroadcast, intentFilter);
+    }
     @Override
     protected void onStart() {
         super.onStart();
@@ -131,14 +199,23 @@ public class ScrapDetailActivity extends BaseActivity implements View.OnClickLis
         if (detailList != null){
             detailList.clear();
         }
-        List<ScrapOrderInfo> orderInfos = LitePal.where("BB_UUID = ?", uuid).find(ScrapOrderInfo.class);
+
+
+
+        ScrapOrderInfo orderInfo = LitePal.where("BB_UUID = ?", uuid).findFirst(ScrapOrderInfo.class);
+
+        if (orderInfo !=  null){
+            String pum = orderInfo.getBB_TOTAL_PNUM();
+            String scanNum = orderInfo.getBB_TOTAL_SCAN_NUM();
+            int unscanNum = Integer.parseInt(pum) - Integer.parseInt(scanNum);
+            binding.scanTotalTv.setText(pum);
+            binding.unscanTotalTv.setText(unscanNum + "");
+            binding.scanedTotalTv.setText(scanNum);
+        }
+
+
         detailList2 = LitePal.where("BD_BB_UUID = ?", uuid).find(ScrapDetail.class);
-        String pum = orderInfos.get(0).getBB_TOTAL_PNUM();
-        String scanNum = orderInfos.get(0).getBB_TOTAL_SCAN_NUM();
-        int unscanNum = Integer.parseInt(pum) - Integer.parseInt(scanNum);
-        binding.scanTotalTv.setText(pum);
-        binding.unscanTotalTv.setText(unscanNum+"");
-        binding.scanedTotalTv.setText(scanNum);
+
         detailList.addAll(detailList2);
         adapter = new ScrapDetailAdapter(detailList, this);
         binding.recyclerView.setAdapter(adapter);
@@ -169,11 +246,20 @@ public class ScrapDetailActivity extends BaseActivity implements View.OnClickLis
             startScan();
         }
         if (view.getId() == R.id.confirm_brn){
-            List<ScrapOrderInfo> orderInfos = LitePal.where("BB_UUID = ?", uuid).find(ScrapOrderInfo.class);
-            String pum = orderInfos.get(0).getBB_TOTAL_PNUM();
-            String scanednum = orderInfos.get(0).getBB_TOTAL_SCAN_NUM();
-            List<ScrapBarcode> barcodes = LitePal.where("UUID = ? and isSubmit = 0", uuid).find(ScrapBarcode.class);
-            if (barcodes.size() == 0){
+
+            ScrapOrderInfo orderInfo = LitePal.where("BB_UUID = ?", uuid).findFirst(ScrapOrderInfo.class);
+
+            String pum = "";
+            String scanednum = "";
+
+            if (orderInfo != null){
+                pum  = orderInfo.getBB_TOTAL_PNUM();
+                scanednum = orderInfo.getBB_TOTAL_SCAN_NUM();
+            }
+
+            int barcode_count = LitePal.where("UUID = ? and isSubmit = 0", uuid).count(ScrapBarcode.class);
+
+            if (barcode_count == 0){
                 BasePopupView popupView = new XPopup.Builder(this)
                         .isDestroyOnDismiss(true)
                         .asConfirm(null, "未扫描条码!", "取消", "确定",
@@ -194,7 +280,6 @@ public class ScrapDetailActivity extends BaseActivity implements View.OnClickLis
                                         @Override
                                         public void onConfirm() {
                                             String BB_STATE = "3";
-                                            String SYSTEM_SERVICE_TYPE= "INDUT_OUT_SCRAP";
                                             UpdataStatuesParamer updataStatuesParamer = new UpdataStatuesParamer(uuid, BB_STATE, SYSTEM_SERVICE_TYPE);
                                             UpParamer upParamer = new UpParamer(updataStatuesParamer);
                                             viewModel.updataSellListStatues(upParamer).observe(ScrapDetailActivity.this, new Observer<JsonObject>() {
@@ -205,7 +290,6 @@ public class ScrapDetailActivity extends BaseActivity implements View.OnClickLis
                                                     }else {
                                                         String code = jsonObject.get("code").toString().replace("\"", "");
                                                         if (code.equals("0")){
-                                                            ScrapOrderInfo orderInfo = orderInfos.get(0);
                                                             orderInfo.setBB_STATE("3");
                                                             orderInfo.saveOrUpdate("BB_UUID = ?", uuid);
                                                             Toast.makeText(ScrapDetailActivity.this, "确认成功", Toast.LENGTH_SHORT).show();
@@ -221,7 +305,6 @@ public class ScrapDetailActivity extends BaseActivity implements View.OnClickLis
 
                 }else {
                     String BB_STATE = "3";
-                    String SYSTEM_SERVICE_TYPE= "INDUT_OUT_SCRAP";
                     UpdataStatuesParamer updataStatuesParamer = new UpdataStatuesParamer(uuid, BB_STATE, SYSTEM_SERVICE_TYPE);
                     UpParamer upParamer = new UpParamer(updataStatuesParamer);
                     viewModel.updataSellListStatues(upParamer).observe(ScrapDetailActivity.this, new Observer<JsonObject>() {
@@ -232,7 +315,6 @@ public class ScrapDetailActivity extends BaseActivity implements View.OnClickLis
                             }else {
                                 String code = jsonObject.get("code").toString().replace("\"", "");
                                 if (code.equals("0")){
-                                    ScrapOrderInfo orderInfo = orderInfos.get(0);
                                     orderInfo.setBB_STATE("3");
                                     orderInfo.saveOrUpdate("BB_UUID = ?", uuid);
                                     Toast.makeText(ScrapDetailActivity.this, "确认成功", Toast.LENGTH_SHORT).show();
@@ -274,6 +356,184 @@ public class ScrapDetailActivity extends BaseActivity implements View.OnClickLis
         }
     }
 
+    private void handleScannerResult(String result) {
+        if (result.length() != 32) {
+            playSound(2);
+            sendErrorCode(result);
+            Toast.makeText(this, "条码格式错误", Toast.LENGTH_LONG).show();
+            return;
+        }
+        if (!result.startsWith("91")) {
+            playSound(2);
+            sendErrorCode(result);
+            Toast.makeText(this, "条码格式错误", Toast.LENGTH_LONG).show();
+            return;
+        }
+        String type = result.substring(22, 23);
+        if (!type.equals("1") && !type.equals("2") && !type.equals("3") && !type.equals("4")) {
+            playSound(2);
+            sendErrorCode(result);
+            Toast.makeText(this, "条码经营方式未知", Toast.LENGTH_LONG).show();
+            return;
+        }
+        String date = result.substring(16, 22);
+        if (!DateUtil.isValidDate(date)) {
+            playSound(2);
+            sendErrorCode(result);
+            Toast.makeText(this, "条码日期无效", Toast.LENGTH_LONG).show();
+            return;
+        }
+        String unitcode = result.substring(8, 16);
+        if (!unitcode.equals(A_NO)) {
+            playSound(2);
+            sendErrorCode(result);
+            Toast.makeText(this, "生产厂家与当前单位不一致", Toast.LENGTH_LONG).show();
+            return;
+        }
+        int count = 0;
+        int size = LitePal.where("barcode = ?", result).count(ScrapBarcode.class);
+        List<SalesOrderParamer> paramers = new ArrayList<>();
+        if (size > 0) {
+            playSound(2);
+            sendErrorCode(result);
+            Toast.makeText(this, "此条码已扫过", Toast.LENGTH_LONG).show();
+            return;
+        }
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String scantime = format.format(new Date());
+        for (int i = 0; i < detailList2.size(); i++) {
+            int mPlanqty = 0;
+            String picgname = detailList2.get(i).getBD_PCIG_NAME();
+            try {
+                String planqty = detailList2.get(i).getBD_BILL_PNUM();
+                mPlanqty = Integer.valueOf(planqty);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            ScrapDetail detail = detailList2.get(i);
+            String pcigCode = detail.getBD_PCIG_CODE();
+            String pcigcodesub = pcigCode.substring(7, 13);
+            String pcigName = detail.getBD_PCIG_NAME();
+            String code = result.substring(2, 8);
+            if (pcigcodesub.equals(code)) {
+                String scanQty = detail.getBD_SCAN_NUM();
+                int mscanQty;
+                if (TextUtils.isEmpty(scanQty)) {
+                    mscanQty = 1;
+                } else {
+                    mscanQty = Integer.valueOf(scanQty) + 1;
+                }
+                if (mscanQty > mPlanqty) {
+                    playSound(2);
+                    sendErrorCode(result);
+                    Toast.makeText(this, "扫描量大于计划量,暂停扫描", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                String scancode = DeviceUtils.getDevUUID(this);
+                ScrapBarcode ScrapBarcode = new ScrapBarcode(uuid, pcigCode, pcigName, result, scantime, scancode);
+                ScrapBarcode.save();
+                String new_scanQty = String.valueOf(mscanQty);
+                ContentValues cv = new ContentValues();
+                cv.put("BD_SCAN_NUM", new_scanQty);
+                LitePal.updateAll(ScrapDetail.class, cv, "BD_PCIG_CODE = ?", pcigCode);
+                ContentValues cv2 = new ContentValues();
+                List<ScrapOrderInfo> orderInfos = LitePal.where("BB_UUID = ?", uuid).find(ScrapOrderInfo.class);
+                String pum = orderInfos.get(0).getBB_TOTAL_PNUM();
+                String BB_TOTAL_SCAN_NUM = orderInfos.get(0).getBB_TOTAL_SCAN_NUM();
+                int scannum = Integer.parseInt(BB_TOTAL_SCAN_NUM) + 1;
+                int unscannum = Integer.parseInt(pum) - scannum;
+                BB_TOTAL_SCAN_NUM = String.valueOf(scannum);
+                cv2.put("BB_TOTAL_SCAN_NUM", BB_TOTAL_SCAN_NUM);
+                LitePal.updateAll(ScrapOrderInfo.class, cv2, "BB_UUID = ?", uuid);
+                binding.brandnameTv.setText(picgname);
+                binding.barcodeTv.setText(result);
+                binding.scanTotalTv.setText(pum);
+                binding.unscanTotalTv.setText(unscannum + "");
+                binding.scanedTotalTv.setText(scannum + "");
+
+                List<SalesBarcodeParamer> salesBarcodeParamers = new ArrayList<>();
+                String BI_FEEDBACK_TIME = format.format(new Date());
+                SalesBarcodeParamer salesBarcodeParamer = new SalesBarcodeParamer(result, scantime, BI_FEEDBACK_TIME);
+                salesBarcodeParamer.setBI_SCANNER_CODE(BI_SCANNER_CODE);
+                salesBarcodeParamer.setBI_SERIAL_NO("");
+                salesBarcodeParamer.setBI_LOCAL_SCAN_DATE(scantime);
+                salesBarcodeParamer.setBI_PACK_ID("");
+                salesBarcodeParamers.add(salesBarcodeParamer);
+                int mscanqty = salesBarcodeParamers.size();
+                SalesOrderParamer salesOrderParamer = new SalesOrderParamer(mPlanqty, pcigCode, mscanqty, salesBarcodeParamers);
+                paramers.add(salesOrderParamer);
+                SellParamer sellParamer = new SellParamer(uuid, paramers);
+                List<SellParamer> sellParamers = new ArrayList<>();
+                sellParamers.add(sellParamer);
+                UploadSellParamer uploadSellParamer = new UploadSellParamer(sellParamers, SYSTEM_SERVICE_TYPE);
+                SellBarcodeReciveParamer paramer = new SellBarcodeReciveParamer(uploadSellParamer);
+                Log.i("TAG", "paramer:" + paramer.toString());
+
+                if (loadingPopup == null) {
+                    loadingPopup = (LoadingPopupView) new XPopup.Builder(this)
+                            .dismissOnTouchOutside(false)
+                            .dismissOnBackPressed(false)
+                            .isLightNavigationBar(true)
+                            .asLoading("加载中...")
+                            .show();
+                } else {
+                    loadingPopup.show();
+                }
+                sellBarcodeReciveViewModel.sellBarcodeRecive(paramer).observe(this, new Observer<DataResult<JsonObject>>() {
+                    @Override
+                    public void onChanged(DataResult<JsonObject> dataResult) {
+
+
+                        loadingPopup.dismiss();
+
+                        int errcode = dataResult.getErrcode();
+                        if (errcode == 0) {
+
+                            ScrapBarcode barcode = new ScrapBarcode(uuid, pcigCode, picgname, result, scantime, scancode);
+                            barcode.setSubmit(true);
+                            barcode.save();
+                            Toast.makeText(ScrapDetailActivity.this, "sucess", Toast.LENGTH_SHORT).show();
+
+//                                String code = jsonObject.get("code").toString().replace("\"", "");
+//                                String message = jsonObject.get("message").toString().replace("\"", "");
+//                                if (code.equals("0")){
+//
+//                                }else {
+//                                    Toast.makeText(SalesFactoryDetailActivity.this, message, Toast.LENGTH_SHORT).show();
+//                                }
+
+                        } else if (errcode == -1) {
+                            Toast.makeText(ScrapDetailActivity.this, "网络异常", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+
+                break;
+            } else {
+                count++;
+            }
+        }
+        if (count == detailList2.size()) {
+            playSound(2);
+            sendErrorCode(result);
+            Toast.makeText(this, "条码不符", Toast.LENGTH_LONG).show();
+            return;
+        }
+        detailList2.clear();
+        detailList2 = LitePal.where("BD_BB_UUID = ?", uuid).find(ScrapDetail.class);
+        detailList.clear();
+        detailList.addAll(detailList2);
+        String pum = detailList2.get(0).getBD_BILL_PNUM();
+        String scanNum = detailList2.get(0).getBD_SCAN_NUM();
+        int unscanNum = Integer.parseInt(pum) - Integer.parseInt(scanNum);
+        binding.scanedTotalTv.setText(pum);
+        binding.unscanTotalTv.setText(unscanNum + "");
+        binding.scanedTotalTv.setText(scanNum);
+        adapter.notifyDataSetChanged();
+
+    }
+
+
     /**
      * 处理二维码扫描结果
      *
@@ -285,164 +545,7 @@ public class ScrapDetailActivity extends BaseActivity implements View.OnClickLis
             if (bundle != null) {
                 if (bundle.getInt(XQRCode.RESULT_TYPE) == XQRCode.RESULT_SUCCESS) {
                     String result = bundle.getString(XQRCode.RESULT_DATA);
-                    if (result.length() != 32){
-                        playSound(2);
-                        sendErrorCode(result);
-                        Toast.makeText(this, "条码格式错误", Toast.LENGTH_LONG).show();
-                        return;
-                    }else {
-                        if (!result.startsWith("91")){
-                            playSound(2);
-                            sendErrorCode(result);
-                            Toast.makeText(this, "条码格式错误", Toast.LENGTH_LONG).show();
-                            return;
-                        }
-                        String type = result.substring(22, 23);
-                        if (!type.equals("1") && !type.equals("2") && !type.equals("3") && !type.equals("4")){
-                            playSound(2);
-                            sendErrorCode(result);
-                            Toast.makeText(this, "条码经营方式未知", Toast.LENGTH_LONG).show();
-                            return;
-                        }
-                        String date = result.substring(16, 22);
-                        if (!DateUtil.isValidDate(date)){
-                            playSound(2);
-                            sendErrorCode(result);
-                            Toast.makeText(this, "条码日期无效", Toast.LENGTH_LONG).show();
-                            return;
-                        }
-                        String unitcode = result.substring(8, 16);
-                        if (!unitcode.equals(A_NO)){
-                            playSound(2);
-                            sendErrorCode(result);
-                            Toast.makeText(this, "生产厂家与当前单位不一致", Toast.LENGTH_LONG).show();
-                            return;
-                        }
-                        int count = 0;
-                        List<ScrapBarcode> barcodes = LitePal.where("barcode = ?", result).find(ScrapBarcode.class);
-                        List<SalesOrderParamer> paramers = new ArrayList<>();
-                        if (barcodes.size() > 0){
-                            playSound(2);
-                            sendErrorCode(result);
-                            Toast.makeText(this, "此条码已扫过", Toast.LENGTH_LONG).show();
-                            return;
-                        }
-                        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                        String scantime = format.format(new Date());
-                        for (int i = 0; i < detailList2.size(); i++){
-                            int mPlanqty = 0;
-                            String picgname = detailList2.get(i).getBD_PCIG_NAME();
-                            try {
-                                String planqty = detailList2.get(i).getBD_BILL_PNUM();
-                                mPlanqty = Integer.valueOf(planqty);
-                            }catch (Exception e){
-                                e.printStackTrace();
-                            }
-                            ScrapDetail detail = detailList2.get(i);
-                            String pcigCode = detail.getBD_PCIG_CODE();
-                            String pcigcodesub = pcigCode.substring(7, 13);
-                            String pcigName = detail.getBD_PCIG_NAME();
-                            String code = result.substring(2, 8);
-                            if (pcigcodesub.equals(code)){
-                                String scanQty = detail.getBD_SCAN_NUM();
-                                int mscanQty;
-                                if (TextUtils.isEmpty(scanQty)){
-                                    mscanQty = 1;
-                                }else {
-                                    mscanQty = Integer.valueOf(scanQty) + 1;
-                                }
-                                if (mscanQty > mPlanqty){
-                                    playSound(2);
-                                    sendErrorCode(result);
-                                    Toast.makeText(this, "扫描量大于计划量,暂停扫描", Toast.LENGTH_SHORT).show();
-                                    return;
-                                }
-                                String scancode = DeviceUtils.getDevUUID(this);
-                                ScrapBarcode salesBarcode = new ScrapBarcode(uuid, pcigCode, pcigName, result, scantime, scancode);
-                                salesBarcode.save();
-                                String new_scanQty = String.valueOf(mscanQty);
-                                ContentValues cv = new ContentValues();
-                                cv.put("BD_SCAN_NUM", new_scanQty);
-                                LitePal.updateAll(ScrapDetail.class, cv, "BD_PCIG_CODE = ?", pcigCode);
-                                ContentValues cv2 = new ContentValues();
-                                List<ScrapOrderInfo> orderInfos = LitePal.where("BB_UUID = ?", uuid).find(ScrapOrderInfo.class);
-                                String pum = orderInfos.get(0).getBB_TOTAL_PNUM();
-                                String BB_TOTAL_SCAN_NUM = orderInfos.get(0).getBB_TOTAL_SCAN_NUM();
-                                int scannum = Integer.parseInt(BB_TOTAL_SCAN_NUM) + 1;
-                                int unscannum = Integer.parseInt(pum) - scannum;
-                                BB_TOTAL_SCAN_NUM = String.valueOf(scannum);
-                                cv2.put("BB_TOTAL_SCAN_NUM", BB_TOTAL_SCAN_NUM);
-                                LitePal.updateAll(ScrapOrderInfo.class, cv2, "BB_UUID = ?", uuid);
-                                binding.brandnameTv.setText(picgname);
-                                binding.barcodeTv.setText(result);
-                                binding.scanTotalTv.setText(pum);
-                                binding.unscanTotalTv.setText(unscannum+"");
-                                binding.scanedTotalTv.setText(scannum+"");
-
-                                List<SalesBarcodeParamer> salesBarcodeParamers = new ArrayList<>();
-                                String BI_FEEDBACK_TIME = format.format(new Date());
-                                SalesBarcodeParamer salesBarcodeParamer = new SalesBarcodeParamer(result, scantime, BI_FEEDBACK_TIME);
-                                salesBarcodeParamer.setBI_SCANNER_CODE(BI_SCANNER_CODE);
-                                salesBarcodeParamer.setBI_SERIAL_NO("");
-                                salesBarcodeParamer.setBI_LOCAL_SCAN_DATE(scantime);
-                                salesBarcodeParamer.setBI_PACK_ID("");
-                                salesBarcodeParamers.add(salesBarcodeParamer);
-                                int mscanqty = salesBarcodeParamers.size();
-                                SalesOrderParamer salesOrderParamer = new SalesOrderParamer(mPlanqty, pcigCode, mscanqty, salesBarcodeParamers);
-                                paramers.add(salesOrderParamer);
-                                SellParamer sellParamer = new SellParamer(uuid, paramers);
-                                List<SellParamer> sellParamers = new ArrayList<>();
-                                sellParamers.add(sellParamer);
-                                String SYSTEM_SERV = "INDUT_OUT_SCRAP";
-                                UploadSellParamer uploadSellParamer = new UploadSellParamer(sellParamers, SYSTEM_SERV);
-                                SellBarcodeReciveParamer paramer = new SellBarcodeReciveParamer(uploadSellParamer);
-                                Log.i("TAG", "paramer:" + paramer.toString());
-                                viewModel3.sellBarcodeRecive(paramer).observe(this, new Observer<DataResult<JsonObject>>() {
-                                    @Override
-                                    public void onChanged(DataResult<JsonObject> dataResult) {
-                                        Log.i("TAG", "dataResult:" + dataResult.toString());
-                                        int errcode = dataResult.getErrcode();
-                                        if (errcode == 0){
-                                            JsonObject jsonObject = dataResult.getT();
-                                            String code = jsonObject.get("code").toString().replace("\"", "");
-                                            String message = jsonObject.get("message").toString().replace("\"", "");
-                                            if (code.equals("0")){
-                                                ScrapBarcode scrapBarcode = new ScrapBarcode(uuid, pcigCode, picgname, result, scantime,scancode);
-                                                scrapBarcode.setSubmit(true);
-                                                scrapBarcode.saveOrUpdate("barcode = ?", result);
-                                                Toast.makeText(ScrapDetailActivity.this, message, Toast.LENGTH_SHORT).show();
-                                            }else {
-                                                Toast.makeText(ScrapDetailActivity.this, message, Toast.LENGTH_SHORT).show();
-                                            }
-                                        }else if (errcode == -1){
-                                            Toast.makeText(ScrapDetailActivity.this, "网络异常", Toast.LENGTH_SHORT).show();
-                                        }
-                                    }
-                                });
-                                break;
-                            }else {
-                                count++;
-                            }
-                        }
-                        if (count == detailList2.size()){
-                            playSound(2);
-                            sendErrorCode(result);
-                            Toast.makeText(this, "条码不符", Toast.LENGTH_LONG).show();
-                            return;
-                        }
-                        detailList2.clear();
-                        detailList2 = LitePal.where("BD_BB_UUID = ?", uuid).find(ScrapDetail.class);
-                        detailList.clear();
-                        detailList.addAll(detailList2);
-                        String pum = detailList2.get(0).getBD_BILL_PNUM();
-                        String scanNum = detailList2.get(0).getBD_SCAN_NUM();
-                        int unscanNum = Integer.parseInt(pum) - Integer.parseInt(scanNum);
-                        binding.scanedTotalTv.setText(pum);
-                        binding.unscanTotalTv.setText(unscanNum+"");
-                        binding.scanedTotalTv.setText(scanNum);
-
-                        adapter.notifyDataSetChanged();
-                    }
+                    handleScannerResult(result);
                 } else if (bundle.getInt(XQRCode.RESULT_TYPE) == XQRCode.RESULT_FAILED) {
                     playSound(2);
                     Toast.makeText(this, "解析二维码失败", Toast.LENGTH_LONG).show();
@@ -457,7 +560,6 @@ public class ScrapDetailActivity extends BaseActivity implements View.OnClickLis
         ErrorBarcode errorBarcode = new ErrorBarcode(barcode, BI_SCANNER_CODE, BI_FEEDBACK_TIME);
         List<ErrorBarcode> errorBarcodes = new ArrayList<>();
         errorBarcodes.add(errorBarcode);
-        String SYSTEM_SERVICE_TYPE = "INDUT_OUT_SCRAP";
         ErrorBarcodeParamer errorBarcodeParamer = new ErrorBarcodeParamer(uuid, SYSTEM_SERVICE_TYPE, errorBarcodes);
         ErrorSignReceiveParamer esrparamer = new ErrorSignReceiveParamer(errorBarcodeParamer);
 
@@ -514,6 +616,27 @@ public class ScrapDetailActivity extends BaseActivity implements View.OnClickLis
         }
     }
 
+    public class ScannerBroascast extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent != null) {
+
+                Bundle bundle = intent.getExtras();
+
+                if (bundle != null) {
+
+                    String result = bundle.getString("data").trim();
+
+                    if (!TextUtils.isEmpty(result)) {
+                        mScannerResult = result;
+                        mHandler.sendEmptyMessage(1);
+                    }
+                }
+            }
+
+        }
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -522,6 +645,9 @@ public class ScrapDetailActivity extends BaseActivity implements View.OnClickLis
         detailList.clear();
         if (soundPool != null){
             soundPool.release();
+        }
+        if (scannerBroadcast != null) {
+            unregisterReceiver(scannerBroadcast);
         }
     }
 
