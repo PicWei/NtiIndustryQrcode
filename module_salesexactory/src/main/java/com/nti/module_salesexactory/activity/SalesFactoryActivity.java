@@ -10,11 +10,13 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import com.alibaba.android.arouter.facade.annotation.Route;
 import com.lxj.xpopup.XPopup;
 import com.lxj.xpopup.impl.LoadingPopupView;
 import com.nti.lib_common.activity.BaseActivity;
 import com.nti.lib_common.bean.DataResult;
 import com.nti.lib_common.bean.MessageEvent;
+import com.nti.lib_common.constants.ARouterPath;
 import com.nti.lib_common.constants.BusinessType;
 import com.nti.lib_common.utils.DeviceUtils;
 import com.nti.module_salesexactory.R;
@@ -36,6 +38,10 @@ import org.litepal.LitePal;
 import java.util.ArrayList;
 import java.util.List;
 
+
+
+//工业销售出厂 INDUT_SALES_FACTORY
+@Route(path = ARouterPath.SALESFACTOR_PATH)
 public class SalesFactoryActivity extends BaseActivity implements View.OnClickListener {
 
     private ActivitySalesFactoryBinding binding;

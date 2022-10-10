@@ -16,13 +16,14 @@ import android.widget.Toast;
 import com.alibaba.android.arouter.launcher.ARouter;
 import com.google.gson.JsonObject;
 import com.nti.lib_common.bean.MessageEvent;
+import com.nti.lib_common.bean.UpParamer;
+import com.nti.lib_common.bean.UpdataStatuesParamer;
 import com.nti.lib_common.constants.ARouterPath;
 import com.nti.lib_common.constants.BusinessType;
 import com.nti.module_returninbound.R;
 import com.nti.module_returninbound.adapter.IncompleteAdapter;
 import com.nti.module_returninbound.bean.ReturnInboundOrderInfo;
-import com.nti.module_returninbound.bean.UpParamer;
-import com.nti.module_returninbound.bean.UpdataStatuesParamer;
+
 import com.nti.module_returninbound.viewmodel.ReturnInboundViewModel;
 
 import org.greenrobot.eventbus.EventBus;

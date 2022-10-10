@@ -8,13 +8,15 @@ import androidx.lifecycle.MutableLiveData;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.nti.lib_common.bean.DataResult;
+import com.nti.lib_common.bean.ErrorSignReceiveParamer;
+import com.nti.lib_common.bean.Paramer;
+import com.nti.lib_common.bean.UpParamer;
 import com.nti.lib_common.utils.HttpUtils;
-import com.nti.module_returninbound.bean.ErrorSignReceiveParamer;
-import com.nti.module_returninbound.bean.Paramer;
+
+
 import com.nti.module_returninbound.bean.ReturnInboundBarcode;
 import com.nti.module_returninbound.bean.ReturnInboundDetail;
 import com.nti.module_returninbound.bean.ReturnInboundOrderInfo;
-import com.nti.module_returninbound.bean.UpParamer;
 import com.nti.module_returninbound.service.IReturnInboundService;
 
 import org.jetbrains.annotations.NotNull;

@@ -32,6 +32,7 @@ import com.lxj.xpopup.core.BasePopupView;
 import com.lxj.xpopup.impl.LoadingPopupView;
 import com.lxj.xpopup.interfaces.OnConfirmListener;
 import com.nti.lib_common.activity.BaseActivity;
+import com.nti.lib_common.activity.CustomCaptureActivity;
 import com.nti.lib_common.bean.DataResult;
 import com.nti.lib_common.bean.ErrorBarcode;
 import com.nti.lib_common.bean.ErrorBarcodeParamer;
@@ -83,6 +84,7 @@ public class MoveinboundDetailActivity extends BaseActivity implements View.OnCl
     private MoveinboundDetailAdapter adapter;
 
     private List<MoveinboundDetail> detailList = new ArrayList<>();
+
     private List<MoveinboundDetail> detailList2 = new ArrayList<>();
 
     /**
@@ -94,18 +96,20 @@ public class MoveinboundDetailActivity extends BaseActivity implements View.OnCl
     private float volumnRatio;
 
 
-
     private String BI_SCANNER_CODE;
 
-    public static final String SYSTEM_SERVICE_TYPE = "INDUT_OUT_SCRAP";
 
-    private MoveinboundViewModel viewModel;
+    public static final String SYSTEM_SERVICE_TYPE = "INDUT_MOVE_STORAGE";
+
+
+    private MoveinboundViewModel MoveinboundViewModel;
+
+    //回送
     private SellBarcodeReciveViewModel sellBarcodeReciveViewModel;
 
-
-    private String mScannerResult;
     private String A_NO;
 
+    private String mScannerResult;
 
     /**
      * PDA扫描枪广播
@@ -148,8 +152,8 @@ public class MoveinboundDetailActivity extends BaseActivity implements View.OnCl
         EventBus.getDefault().register(this);
         initSound();
         ARouter.getInstance().inject(this);
-        uuid = getIntent().getStringExtra("uuid");
 
+        uuid = getIntent().getStringExtra("uuid");
         BI_SCANNER_CODE = DeviceUtils.getDevUUID(this);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
@@ -159,9 +163,9 @@ public class MoveinboundDetailActivity extends BaseActivity implements View.OnCl
         binding.confirmBrn.setOnClickListener(this);
         binding.orderTv.setText(contractNo);
         binding.inflowTv.setText(flowName);
-        viewModel = new ViewModelProvider(this).get(MoveinboundViewModel.class);
-        sellBarcodeReciveViewModel = new ViewModelProvider(this).get(SellBarcodeReciveViewModel.class);
 
+        MoveinboundViewModel = new ViewModelProvider(this).get(MoveinboundViewModel.class);
+        sellBarcodeReciveViewModel = new ViewModelProvider(this).get(SellBarcodeReciveViewModel.class);
 
         //最新数据展示
         loadLatelyData();
@@ -169,13 +173,11 @@ public class MoveinboundDetailActivity extends BaseActivity implements View.OnCl
         initRegister();
     }
 
+
     private void loadLatelyData() {
-       MoveinboundOrderInfo info = LitePal.where("BB_UUID = ?", uuid).findFirst(MoveinboundOrderInfo.class);
+        MoveinboundOrderInfo info = LitePal.where("BB_UUID = ?", uuid).findFirst(MoveinboundOrderInfo.class);
         if (info!=null){
-
             A_NO = info.getA_NO();
-
-            Log.i("ccc","A_NO" + A_NO);
         }
     }
 
@@ -188,7 +190,6 @@ public class MoveinboundDetailActivity extends BaseActivity implements View.OnCl
         registerReceiver(scannerBroadcast, intentFilter);
     }
 
-
     @Override
     protected void onStart() {
         super.onStart();
@@ -198,6 +199,7 @@ public class MoveinboundDetailActivity extends BaseActivity implements View.OnCl
         if (detailList != null){
             detailList.clear();
         }
+
 
         MoveinboundOrderInfo orderInfo = LitePal.where("BB_UUID = ?", uuid).findFirst(MoveinboundOrderInfo.class);
 
@@ -210,6 +212,9 @@ public class MoveinboundDetailActivity extends BaseActivity implements View.OnCl
             binding.scanedTotalTv.setText(scanNum);
         }
 
+
+
+        detailList2 = LitePal.where("BD_BB_UUID = ?", uuid).find(MoveinboundDetail.class);
 
         detailList.addAll(detailList2);
         adapter = new MoveinboundDetailAdapter(detailList, this);
@@ -241,9 +246,8 @@ public class MoveinboundDetailActivity extends BaseActivity implements View.OnCl
             startScan();
         }
         if (view.getId() == R.id.confirm_brn){
-
-
             MoveinboundOrderInfo orderInfo = LitePal.where("BB_UUID = ?", uuid).findFirst(MoveinboundOrderInfo.class);
+
 
             String pum = "";
             String scanednum = "";
@@ -253,10 +257,8 @@ public class MoveinboundDetailActivity extends BaseActivity implements View.OnCl
                 scanednum = orderInfo.getBB_TOTAL_SCAN_NUM();
             }
 
+
             int barcode_count = LitePal.where("UUID = ? and isSubmit = 0", uuid).count(MoveinboundBarcode.class);
-
-
-
             if (barcode_count == 0){
                 BasePopupView popupView = new XPopup.Builder(this)
                         .isDestroyOnDismiss(true)
@@ -278,9 +280,10 @@ public class MoveinboundDetailActivity extends BaseActivity implements View.OnCl
                                         @Override
                                         public void onConfirm() {
                                             String BB_STATE = "3";
+
                                             UpdataStatuesParamer updataStatuesParamer = new UpdataStatuesParamer(uuid, BB_STATE, SYSTEM_SERVICE_TYPE);
                                             UpParamer upParamer = new UpParamer(updataStatuesParamer);
-                                            viewModel.updataSellListStatues(upParamer).observe(MoveinboundDetailActivity.this, new Observer<JsonObject>() {
+                                            MoveinboundViewModel.updataSellListStatues(upParamer).observe(MoveinboundDetailActivity.this, new Observer<JsonObject>() {
                                                 @Override
                                                 public void onChanged(JsonObject jsonObject) {
                                                     if (jsonObject == null){
@@ -303,10 +306,10 @@ public class MoveinboundDetailActivity extends BaseActivity implements View.OnCl
 
                 }else {
                     String BB_STATE = "3";
-                    String SYSTEM_SERVICE_TYPE= "INDUT_MOVE_STORAGE";
+
                     UpdataStatuesParamer updataStatuesParamer = new UpdataStatuesParamer(uuid, BB_STATE, SYSTEM_SERVICE_TYPE);
                     UpParamer upParamer = new UpParamer(updataStatuesParamer);
-                    viewModel.updataSellListStatues(upParamer).observe(MoveinboundDetailActivity.this, new Observer<JsonObject>() {
+                    MoveinboundViewModel.updataSellListStatues(upParamer).observe(MoveinboundDetailActivity.this, new Observer<JsonObject>() {
                         @Override
                         public void onChanged(JsonObject jsonObject) {
                             if (jsonObject == null){
@@ -314,7 +317,6 @@ public class MoveinboundDetailActivity extends BaseActivity implements View.OnCl
                             }else {
                                 String code = jsonObject.get("code").toString().replace("\"", "");
                                 if (code.equals("0")){
-
                                     orderInfo.setBB_STATE("3");
                                     orderInfo.saveOrUpdate("BB_UUID = ?", uuid);
                                     Toast.makeText(MoveinboundDetailActivity.this, "确认成功", Toast.LENGTH_SHORT).show();
@@ -355,6 +357,7 @@ public class MoveinboundDetailActivity extends BaseActivity implements View.OnCl
             handleScanResult(data);
         }
     }
+
 
 
     private void handleScannerResult(String result) {
@@ -431,8 +434,8 @@ public class MoveinboundDetailActivity extends BaseActivity implements View.OnCl
                     return;
                 }
                 String scancode = DeviceUtils.getDevUUID(this);
-                MoveinboundBarcode ScrapBarcode = new MoveinboundBarcode(uuid, pcigCode, pcigName, result, scantime, scancode);
-                ScrapBarcode.save();
+                MoveinboundBarcode MoveinboundBarcode = new MoveinboundBarcode(uuid, pcigCode, pcigName, result, scantime, scancode);
+                MoveinboundBarcode.save();
                 String new_scanQty = String.valueOf(mscanQty);
                 ContentValues cv = new ContentValues();
                 cv.put("BD_SCAN_NUM", new_scanQty);
@@ -533,7 +536,6 @@ public class MoveinboundDetailActivity extends BaseActivity implements View.OnCl
         adapter.notifyDataSetChanged();
 
     }
-
     /**
      * 处理二维码扫描结果
      *
@@ -545,6 +547,7 @@ public class MoveinboundDetailActivity extends BaseActivity implements View.OnCl
             if (bundle != null) {
                 if (bundle.getInt(XQRCode.RESULT_TYPE) == XQRCode.RESULT_SUCCESS) {
                     String result = bundle.getString(XQRCode.RESULT_DATA);
+
                     handleScannerResult(result);
                 } else if (bundle.getInt(XQRCode.RESULT_TYPE) == XQRCode.RESULT_FAILED) {
                     playSound(2);
@@ -560,11 +563,10 @@ public class MoveinboundDetailActivity extends BaseActivity implements View.OnCl
         ErrorBarcode errorBarcode = new ErrorBarcode(barcode, BI_SCANNER_CODE, BI_FEEDBACK_TIME);
         List<ErrorBarcode> errorBarcodes = new ArrayList<>();
         errorBarcodes.add(errorBarcode);
-        String SYSTEM_SERVICE_TYPE = "INDUT_MOVE_STORAGE";
         ErrorBarcodeParamer errorBarcodeParamer = new ErrorBarcodeParamer(uuid, SYSTEM_SERVICE_TYPE, errorBarcodes);
         ErrorSignReceiveParamer esrparamer = new ErrorSignReceiveParamer(errorBarcodeParamer);
 
-        viewModel.errorSignReceive(esrparamer).observe(this, new Observer<JsonObject>() {
+        MoveinboundViewModel.errorSignReceive(esrparamer).observe(this, new Observer<JsonObject>() {
             @Override
             public void onChanged(JsonObject jsonObject) {
                 if (jsonObject == null){
@@ -617,6 +619,8 @@ public class MoveinboundDetailActivity extends BaseActivity implements View.OnCl
         }
     }
 
+
+
     public class ScannerBroascast extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -653,5 +657,5 @@ public class MoveinboundDetailActivity extends BaseActivity implements View.OnCl
             unregisterReceiver(scannerBroadcast);
         }
     }
-    
+
 }

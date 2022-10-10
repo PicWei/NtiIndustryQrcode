@@ -35,6 +35,8 @@ import org.greenrobot.eventbus.ThreadMode;
 import org.litepal.LitePal;
 
 import java.util.List;
+
+//工业移库入库主页 INDUT_MOVE_STORAGE
 @Route(path = ARouterPath.MOVEINBOUND_PATH)
 public class MoveinboundActivity extends BaseActivity implements View.OnClickListener{
 

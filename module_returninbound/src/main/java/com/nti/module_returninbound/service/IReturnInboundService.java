@@ -1,9 +1,10 @@
 package com.nti.module_returninbound.service;
 
 import com.google.gson.JsonObject;
-import com.nti.module_returninbound.bean.ErrorSignReceiveParamer;
-import com.nti.module_returninbound.bean.Paramer;
-import com.nti.module_returninbound.bean.UpParamer;
+import com.nti.lib_common.bean.ErrorSignReceiveParamer;
+import com.nti.lib_common.bean.Paramer;
+import com.nti.lib_common.bean.UpParamer;
+
 
 import io.reactivex.Observable;
 import retrofit2.http.Body;

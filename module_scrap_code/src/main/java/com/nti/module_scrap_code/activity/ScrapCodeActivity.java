@@ -40,6 +40,8 @@ import org.greenrobot.eventbus.ThreadMode;
 import org.litepal.LitePal;
 
 import java.util.List;
+
+//工业出入库报废补码 INDUT_OUT_SCRAP
 @Route(path = ARouterPath.SCRAP_CODE_PATH)
 public class ScrapCodeActivity extends BaseActivity implements View.OnClickListener {
 

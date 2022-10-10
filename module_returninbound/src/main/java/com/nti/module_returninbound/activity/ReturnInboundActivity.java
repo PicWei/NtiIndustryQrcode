@@ -17,12 +17,12 @@ import com.lxj.xpopup.impl.LoadingPopupView;
 import com.nti.lib_common.activity.BaseActivity;
 import com.nti.lib_common.bean.DataResult;
 import com.nti.lib_common.bean.MessageEvent;
+import com.nti.lib_common.bean.Paramer;
+import com.nti.lib_common.bean.Params;
 import com.nti.lib_common.constants.ARouterPath;
 import com.nti.lib_common.constants.BusinessType;
 import com.nti.lib_common.utils.DeviceUtils;
 import com.nti.module_returninbound.R;
-import com.nti.module_returninbound.bean.Paramer;
-import com.nti.module_returninbound.bean.Params;
 import com.nti.module_returninbound.bean.ReturnInboundOrderInfo;
 import com.nti.module_returninbound.databinding.ActivityReturnInboundBinding;
 import com.nti.module_returninbound.fragment.CompletedFragment;
@@ -37,6 +37,8 @@ import org.litepal.LitePal;
 
 import java.util.List;
 
+
+//工业退货入库 INDUT_RETURN_TREASURY 
 @Route(path = ARouterPath.RETURNINBOUND_PATH)
 public class ReturnInboundActivity extends BaseActivity implements View.OnClickListener {
 
@@ -45,20 +47,48 @@ public class ReturnInboundActivity extends BaseActivity implements View.OnClickL
     private LoadingPopupView loadingPopup;
     private int current = 1;
 
+    public static final String SYSTEM_SERVICE_TYPE = "INDUT_RETURN_TREASURY";
+
+    String deviceId;
+
+    //未完成
+    private int unFinishCount;
+
+    //进行中
+    private int doingCount;
+
+    //已完成
+    private int finishCount;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_return_inbound);
         EventBus.getDefault().register(this);
+
+        initListener();
+
+        viewModel = new ViewModelProvider(this).get(ReturnInboundViewModel.class);
+
+        deviceId = DeviceUtils.getDevUUID(this);
+
+        loadData();
+
+    }
+
+    private void initListener() {
         binding.incompleteCl.setOnClickListener(this);
         binding.ongoingCl.setOnClickListener(this);
         binding.completedCl.setOnClickListener(this);
         binding.titleBar.findViewById(R.id.right_cl).setOnClickListener(this);
-        viewModel = new ViewModelProvider(this).get(ReturnInboundViewModel.class);
-        String deviceId = DeviceUtils.getDevUUID(this);
-        String SYSTEM_SERVICE_TYPE = "INDUT_RETURN_TREASURY";
-        Params params = new Params(deviceId, SYSTEM_SERVICE_TYPE);
-        Paramer paramer = new Paramer(params);
+    }
+
+    /**
+     * 请求数据
+     */
+    private void loadData() {
+       Params params = new Params(deviceId, SYSTEM_SERVICE_TYPE);
+       Paramer paramer = new Paramer(params);
         if (loadingPopup == null) {
             loadingPopup = (LoadingPopupView)new XPopup.Builder(this)
                     .dismissOnBackPressed(true)
@@ -76,38 +106,39 @@ public class ReturnInboundActivity extends BaseActivity implements View.OnClickL
                 if (errcode == -1){
                     Toast.makeText(ReturnInboundActivity.this, "网络异常", Toast.LENGTH_SHORT).show();
                 }else {
-                    List<ReturnInboundOrderInfo> returnInboundOrderInfos = dataResult.getT();
-                    if (returnInboundOrderInfos == null || returnInboundOrderInfos.isEmpty()){
+                    List<ReturnInboundOrderInfo> ReturnInboundOrderInfos = dataResult.getT();
+                    if (ReturnInboundOrderInfos == null || ReturnInboundOrderInfos.isEmpty()){
                         Toast.makeText(ReturnInboundActivity.this, "数据为空", Toast.LENGTH_SHORT).show();
                     }else {
                         binding.incompleteCl.performClick();
-                        List<ReturnInboundOrderInfo> orderInfos = LitePal.where("BB_STATE = ?", "4").find(ReturnInboundOrderInfo.class);
-                        List<ReturnInboundOrderInfo> orderInfos2 = LitePal.where("BB_STATE = ?", "1").find(ReturnInboundOrderInfo.class);
-                        List<ReturnInboundOrderInfo> orderInfos3 = LitePal.where("BB_STATE = ? and PDA_SCANNER_IS_END = ?", "3", "0").find(ReturnInboundOrderInfo.class);
-                        int incompleteNum = orderInfos.size();
-                        int ongoingNum = orderInfos2.size();
-                        int completeNUm = orderInfos3.size();
-                        binding.incompleteNum.setText(incompleteNum+"");
-                        binding.ongoingNum.setText(ongoingNum+"");
-                        binding.completedNum.setText(completeNUm+"");
+                        loadViewCount();
                     }
                 }
             }
         });
     }
 
+
+
+    /**
+     * 顶部tab数量
+     */
+    private void loadViewCount() {
+        unFinishCount = LitePal.where("BB_STATE = ?", "4").count(ReturnInboundOrderInfo.class);
+        doingCount = LitePal.where("BB_STATE = ?", "1").count(ReturnInboundOrderInfo.class);
+        finishCount = LitePal.where("BB_STATE = ? and PDA_SCANNER_IS_END = ?", "3", "0").count(ReturnInboundOrderInfo.class);
+
+        binding.incompleteNum.setText(unFinishCount + "");
+        binding.ongoingNum.setText(doingCount + "");
+        binding.completedNum.setText(finishCount + "");
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
-        List<ReturnInboundOrderInfo> orderInfos = LitePal.where("BB_STATE = ?", "4").find(ReturnInboundOrderInfo.class);
-        List<ReturnInboundOrderInfo> orderInfos2 = LitePal.where("BB_STATE = ?", "1").find(ReturnInboundOrderInfo.class);
-        List<ReturnInboundOrderInfo> orderInfos3 = LitePal.where("BB_STATE = ? and PDA_SCANNER_IS_END = ?", "3", "0").find(ReturnInboundOrderInfo.class);
-        int incompleteNum = orderInfos.size();
-        int ongoingNum = orderInfos2.size();
-        int completeNUm = orderInfos3.size();
-        binding.incompleteNum.setText(incompleteNum+"");
-        binding.ongoingNum.setText(ongoingNum+"");
-        binding.completedNum.setText(completeNUm+"");
+
+        loadViewCount();
+
         if (current == 1){
             binding.incompleteCl.performClick();
         }
@@ -137,45 +168,7 @@ public class ReturnInboundActivity extends BaseActivity implements View.OnClickL
             Fragment completedFragment = CompletedFragment.newInstance();
             getSupportFragmentManager().beginTransaction().replace(R.id.container, completedFragment).commit();
         }else if ((view.getId()) == R.id.right_cl){
-            String deviceId = DeviceUtils.getDevUUID(this);
-            String SYSTEM_SERVICE_TYPE = "INDUT_RETURN_TREASURY";
-            Params params = new Params(deviceId, SYSTEM_SERVICE_TYPE);
-            Paramer paramer = new Paramer(params);
-            if (loadingPopup == null) {
-                loadingPopup = (LoadingPopupView)new XPopup.Builder(this)
-                        .dismissOnBackPressed(true)
-                        .isLightNavigationBar(true)
-                        .asLoading("加载中...")
-                        .show();
-            }else {
-                loadingPopup.show();
-            }
-            viewModel.PDA_H(paramer).observe(this, new Observer<DataResult<List<ReturnInboundOrderInfo>>>() {
-                @Override
-                public void onChanged(DataResult<List<ReturnInboundOrderInfo>> dataResult) {
-                    loadingPopup.dismiss();
-                    int errcode = dataResult.getErrcode();
-                    if (errcode == -1){
-                        Toast.makeText(ReturnInboundActivity.this, "网络异常", Toast.LENGTH_SHORT).show();
-                    }else {
-                        List<ReturnInboundOrderInfo> returnInboundOrderInfos = dataResult.getT();
-                        if (returnInboundOrderInfos == null || returnInboundOrderInfos.isEmpty()){
-                            Toast.makeText(ReturnInboundActivity.this, "数据为空", Toast.LENGTH_SHORT).show();
-                        }else {
-                            binding.incompleteCl.performClick();
-                            List<ReturnInboundOrderInfo> orderInfos = LitePal.where("BB_STATE = ?", "4").find(ReturnInboundOrderInfo.class);
-                            List<ReturnInboundOrderInfo> orderInfos2 = LitePal.where("BB_STATE = ?", "1").find(ReturnInboundOrderInfo.class);
-                            List<ReturnInboundOrderInfo> orderInfos3 = LitePal.where("BB_STATE = ? and PDA_SCANNER_IS_END = ?", "3", "0").find(ReturnInboundOrderInfo.class);
-                            int incompleteNum = orderInfos.size();
-                            int ongoingNum = orderInfos2.size();
-                            int completeNUm = orderInfos3.size();
-                            binding.incompleteNum.setText(incompleteNum+"");
-                            binding.ongoingNum.setText(ongoingNum+"");
-                            binding.completedNum.setText(completeNUm+"");
-                        }
-                    }
-                }
-            });
+            loadData();
         }
     }
 
@@ -232,9 +225,7 @@ public class ReturnInboundActivity extends BaseActivity implements View.OnClickL
     public void onMessageEvent(MessageEvent event){
         switch (event.what){
             case BusinessType.UPDATA_ONGOING:
-                List<ReturnInboundOrderInfo> orderInfos2 = LitePal.where("BB_STATE = ? or BB_STATE = ? or BB_STATE = ?", "1", "3", "4").find(ReturnInboundOrderInfo.class);
-                int ongoingNum = orderInfos2.size();
-                binding.ongoingNum.setText(ongoingNum+"");
+                loadViewCount();
                 break;
         }
     }
@@ -244,4 +235,5 @@ public class ReturnInboundActivity extends BaseActivity implements View.OnClickL
         super.onDestroy();
         EventBus.getDefault().unregister(this);
     }
+
 }

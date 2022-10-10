@@ -25,6 +25,7 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.alibaba.android.arouter.facade.annotation.Autowired;
+import com.alibaba.android.arouter.facade.annotation.Route;
 import com.alibaba.android.arouter.launcher.ARouter;
 import com.google.gson.JsonObject;
 import com.lxj.xpopup.XPopup;
@@ -45,6 +46,7 @@ import com.nti.lib_common.bean.SellParamer;
 import com.nti.lib_common.bean.UpParamer;
 import com.nti.lib_common.bean.UpdataStatuesParamer;
 import com.nti.lib_common.bean.UploadSellParamer;
+import com.nti.lib_common.constants.ARouterPath;
 import com.nti.lib_common.constants.BusinessType;
 import com.nti.lib_common.utils.DateUtil;
 import com.nti.lib_common.utils.DeviceUtils;
@@ -76,6 +78,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
+@Route(path = ARouterPath.LOSSDETAIL_PATH)
 public class LossDetailActivity extends BaseActivity implements View.OnClickListener {
 
     private ActivityLossDetailBinding binding;
@@ -561,7 +564,6 @@ public class LossDetailActivity extends BaseActivity implements View.OnClickList
         ErrorBarcode errorBarcode = new ErrorBarcode(barcode, BI_SCANNER_CODE, BI_FEEDBACK_TIME);
         List<ErrorBarcode> errorBarcodes = new ArrayList<>();
         errorBarcodes.add(errorBarcode);
-        String SYSTEM_SERVICE_TYPE = "INDUT_WAREHOUSE_EXCESSIVE";
         ErrorBarcodeParamer errorBarcodeParamer = new ErrorBarcodeParamer(uuid, SYSTEM_SERVICE_TYPE, errorBarcodes);
         ErrorSignReceiveParamer esrparamer = new ErrorSignReceiveParamer(errorBarcodeParamer);
 

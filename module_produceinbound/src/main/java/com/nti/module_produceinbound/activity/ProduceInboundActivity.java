@@ -36,6 +36,8 @@ import org.litepal.LitePal;
 
 import java.util.List;
 
+
+//工业合作生产到货入库 INDUT_JOINT_ARRIVAL
 @Route(path = ARouterPath.PRODUCEINBOUND_PATH)
 public class ProduceInboundActivity extends BaseActivity implements View.OnClickListener {
 
@@ -44,69 +46,38 @@ public class ProduceInboundActivity extends BaseActivity implements View.OnClick
     private LoadingPopupView loadingPopup;
     private int current = 1;
 
+
+    public static final String SYSTEM_SERVICE_TYPE = "INDUT_JOINT_ARRIVAL";
+
+    String deviceId;
+
+    //未完成
+    private int unFinishCount;
+
+    //进行中
+    private int doingCount;
+
+    //已完成
+    private int finishCount;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_produce_inbound);
+        binding = DataBindingUtil.setContentView(this,R.layout.activity_produce_inbound);
         EventBus.getDefault().register(this);
-        binding.incompleteCl.setOnClickListener(this);
-        binding.ongoingCl.setOnClickListener(this);
-        binding.completedCl.setOnClickListener(this);
-        binding.titleBar.findViewById(R.id.right_cl).setOnClickListener(this);
+
+        initListener();
         viewModel = new ViewModelProvider(this).get(ProduceInboundViewModel.class);
-        String deviceId = DeviceUtils.getDevUUID(this);
-        String SYSTEM_SERVICE_TYPE = "INDUT_JOINT_ARRIVAL";
-        Params params = new Params(deviceId, SYSTEM_SERVICE_TYPE);
-        Paramer paramer = new Paramer(params);
-        if (loadingPopup == null) {
-            loadingPopup = (LoadingPopupView)new XPopup.Builder(this)
-                    .dismissOnBackPressed(true)
-                    .isLightNavigationBar(true)
-                    .asLoading("加载中...")
-                    .show();
-        }else {
-            loadingPopup.show();
-        }
-        viewModel.PDA_H(paramer).observe(this, new Observer<DataResult<List<ProduceInboundOrderInfo>>>() {
-            @Override
-            public void onChanged(DataResult<List<ProduceInboundOrderInfo>> dataResult) {
-                loadingPopup.dismiss();
-                int errcode = dataResult.getErrcode();
-                if (errcode == -1){
-                    Toast.makeText(ProduceInboundActivity.this, "网络异常", Toast.LENGTH_SHORT).show();
-                }else {
-                    List<ProduceInboundOrderInfo> produceInboundOrderInfos = dataResult.getT();
-                    if (produceInboundOrderInfos == null || produceInboundOrderInfos.isEmpty()){
-                        Toast.makeText(ProduceInboundActivity.this, "数据为空", Toast.LENGTH_SHORT).show();
-                    }else {
-                        binding.incompleteCl.performClick();
-                        List<ProduceInboundOrderInfo> orderInfos = LitePal.where("BB_STATE = ?", "4").find(ProduceInboundOrderInfo.class);
-                        List<ProduceInboundOrderInfo> orderInfos2 = LitePal.where("BB_STATE = ?", "1").find(ProduceInboundOrderInfo.class);
-                        List<ProduceInboundOrderInfo> orderInfos3 = LitePal.where("BB_STATE = ? and PDA_SCANNER_IS_END = ?", "3", "0").find(ProduceInboundOrderInfo.class);
-                        int incompleteNum = orderInfos.size();
-                        int ongoingNum = orderInfos2.size();
-                        int completeNUm = orderInfos3.size();
-                        binding.incompleteNum.setText(incompleteNum+"");
-                        binding.ongoingNum.setText(ongoingNum+"");
-                        binding.completedNum.setText(completeNUm+"");
-                    }
-                }
-            }
-        });
+        deviceId = DeviceUtils.getDevUUID(this);
+
+        loadData();
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        List<ProduceInboundOrderInfo> orderInfos = LitePal.where("BB_STATE = ?", "4").find(ProduceInboundOrderInfo.class);
-        List<ProduceInboundOrderInfo> orderInfos2 = LitePal.where("BB_STATE = ?", "1").find(ProduceInboundOrderInfo.class);
-        List<ProduceInboundOrderInfo> orderInfos3 = LitePal.where("BB_STATE = ? and PDA_SCANNER_IS_END = ?", "3", "0").find(ProduceInboundOrderInfo.class);
-        int incompleteNum = orderInfos.size();
-        int ongoingNum = orderInfos2.size();
-        int completeNUm = orderInfos3.size();
-        binding.incompleteNum.setText(incompleteNum+"");
-        binding.ongoingNum.setText(ongoingNum+"");
-        binding.completedNum.setText(completeNUm+"");
+
+        loadViewCount();
         if (current == 1){
             binding.incompleteCl.performClick();
         }
@@ -116,6 +87,66 @@ public class ProduceInboundActivity extends BaseActivity implements View.OnClick
         if (current == 3){
             binding.completedCl.performClick();
         }
+    }
+
+
+    private void initListener() {
+        binding.incompleteCl.setOnClickListener(this);
+        binding.ongoingCl.setOnClickListener(this);
+        binding.completedCl.setOnClickListener(this);
+        binding.titleBar.findViewById(R.id.right_cl).setOnClickListener(this);
+    }
+
+
+    /**
+     * 请求数据
+     */
+    private void loadData() {
+        Params params = new Params(deviceId, SYSTEM_SERVICE_TYPE);
+        Paramer paramer = new Paramer(params);
+        if (loadingPopup == null) {
+            loadingPopup = (LoadingPopupView) new XPopup.Builder(this)
+                    .dismissOnTouchOutside(false)
+                    .dismissOnBackPressed(false)
+                    .isLightNavigationBar(true)
+                    .asLoading("加载中...")
+                    .show();
+        } else {
+            loadingPopup.show();
+        }
+        viewModel.PDA_H(paramer).observe(this, new Observer<DataResult<List<ProduceInboundOrderInfo>>>() {
+            @Override
+            public void onChanged(DataResult<List<ProduceInboundOrderInfo>> dataResult) {
+                loadingPopup.dismiss();
+                int errcode = dataResult.getErrcode();
+                if (errcode == -1) {
+                    Toast.makeText(ProduceInboundActivity.this, "网络异常", Toast.LENGTH_SHORT).show();
+                } else if (errcode == 0) {
+                    List<ProduceInboundOrderInfo> salesFactoryOrderInfos = dataResult.getT();
+                    if (salesFactoryOrderInfos == null || salesFactoryOrderInfos.isEmpty()) {
+                        Toast.makeText(ProduceInboundActivity.this, "数据为空", Toast.LENGTH_SHORT).show();
+                    } else {
+                        binding.incompleteCl.performClick();
+
+                        loadViewCount();
+                    }
+                }
+            }
+        });
+
+    }
+
+    /**
+     * 顶部tab数量
+     */
+    private void loadViewCount() {
+        unFinishCount = LitePal.where("BB_STATE = ?", "4").count(ProduceInboundOrderInfo.class);
+        doingCount = LitePal.where("BB_STATE = ?", "1").count(ProduceInboundOrderInfo.class);
+        finishCount = LitePal.where("BB_STATE = ? and PDA_SCANNER_IS_END = ?", "3", "0").count(ProduceInboundOrderInfo.class);
+
+        binding.incompleteNum.setText(unFinishCount + "");
+        binding.ongoingNum.setText(doingCount + "");
+        binding.completedNum.setText(finishCount + "");
     }
 
     @Override
@@ -136,45 +167,7 @@ public class ProduceInboundActivity extends BaseActivity implements View.OnClick
             Fragment completedFragment = CompletedFragment.newInstance();
             getSupportFragmentManager().beginTransaction().replace(R.id.container, completedFragment).commit();
         }else if ((view.getId()) == R.id.right_cl){
-            String deviceId = DeviceUtils.getDevUUID(this);
-            String SYSTEM_SERVICE_TYPE = "INDUT_JOINT_ARRIVAL";
-            Params params = new Params(deviceId, SYSTEM_SERVICE_TYPE);
-            Paramer paramer = new Paramer(params);
-            if (loadingPopup == null) {
-                loadingPopup = (LoadingPopupView)new XPopup.Builder(this)
-                        .dismissOnBackPressed(true)
-                        .isLightNavigationBar(true)
-                        .asLoading("加载中...")
-                        .show();
-            }else {
-                loadingPopup.show();
-            }
-            viewModel.PDA_H(paramer).observe(this, new Observer<DataResult<List<ProduceInboundOrderInfo>>>() {
-                @Override
-                public void onChanged(DataResult<List<ProduceInboundOrderInfo>> dataResult) {
-                    loadingPopup.dismiss();
-                    int errcode = dataResult.getErrcode();
-                    if (errcode == -1){
-                        Toast.makeText(ProduceInboundActivity.this, "网络异常", Toast.LENGTH_SHORT).show();
-                    }else {
-                        List<ProduceInboundOrderInfo> produceInboundOrderInfos = dataResult.getT();
-                        if (produceInboundOrderInfos == null || produceInboundOrderInfos.isEmpty()){
-                            Toast.makeText(ProduceInboundActivity.this, "数据为空", Toast.LENGTH_SHORT).show();
-                        }else {
-                            binding.incompleteCl.performClick();
-                            List<ProduceInboundOrderInfo> orderInfos = LitePal.where("BB_STATE = ?", "4").find(ProduceInboundOrderInfo.class);
-                            List<ProduceInboundOrderInfo> orderInfos2 = LitePal.where("BB_STATE = ?", "1").find(ProduceInboundOrderInfo.class);
-                            List<ProduceInboundOrderInfo> orderInfos3 = LitePal.where("BB_STATE = ? and PDA_SCANNER_IS_END = ?", "3", "0").find(ProduceInboundOrderInfo.class);
-                            int incompleteNum = orderInfos.size();
-                            int ongoingNum = orderInfos2.size();
-                            int completeNUm = orderInfos3.size();
-                            binding.incompleteNum.setText(incompleteNum+"");
-                            binding.ongoingNum.setText(ongoingNum+"");
-                            binding.completedNum.setText(completeNUm+"");
-                        }
-                    }
-                }
-            });
+            loadData();
         }
     }
 
@@ -231,9 +224,7 @@ public class ProduceInboundActivity extends BaseActivity implements View.OnClick
     public void onMessageEvent(MessageEvent event){
         switch (event.what){
             case BusinessType.UPDATA_ONGOING:
-                List<ProduceInboundOrderInfo> orderInfos2 = LitePal.where("BB_STATE = ? or BB_STATE = ? or BB_STATE = ?", "1", "3", "4").find(ProduceInboundOrderInfo.class);
-                int ongoingNum = orderInfos2.size();
-                binding.ongoingNum.setText(ongoingNum+"");
+                loadViewCount();
                 break;
         }
     }
@@ -243,5 +234,5 @@ public class ProduceInboundActivity extends BaseActivity implements View.OnClick
         super.onDestroy();
         EventBus.getDefault().unregister(this);
     }
-    
+
 }

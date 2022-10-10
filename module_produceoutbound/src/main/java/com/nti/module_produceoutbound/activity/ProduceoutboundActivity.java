@@ -36,6 +36,8 @@ import org.greenrobot.eventbus.ThreadMode;
 import org.litepal.LitePal;
 
 import java.util.List;
+
+//工业合作生产退货出库 INDUT_COOPERATIVE_RETURN
 @Route(path = ARouterPath.PRODUCEOUTBOUND_PATH)
 public class ProduceoutboundActivity extends BaseActivity implements View.OnClickListener {
 
@@ -44,18 +46,46 @@ public class ProduceoutboundActivity extends BaseActivity implements View.OnClic
     private LoadingPopupView loadingPopup;
     private int current = 1;
 
+    public static final String SYSTEM_SERVICE_TYPE = "INDUT_COOPERATIVE_RETURN";
+
+    String deviceId;
+
+    //未完成
+    private int unFinishCount;
+
+    //进行中
+    private int doingCount;
+
+    //已完成
+    private int finishCount;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_produceoutbound);
         EventBus.getDefault().register(this);
+
+        initListener();
+
+        viewModel = new ViewModelProvider(this).get(ProduceoutboundViewModel.class);
+
+        deviceId = DeviceUtils.getDevUUID(this);
+
+        loadData();
+
+    }
+
+    private void initListener() {
         binding.incompleteCl.setOnClickListener(this);
         binding.ongoingCl.setOnClickListener(this);
         binding.completedCl.setOnClickListener(this);
         binding.titleBar.findViewById(R.id.right_cl).setOnClickListener(this);
-        viewModel = new ViewModelProvider(this).get(ProduceoutboundViewModel.class);
-        String deviceId = DeviceUtils.getDevUUID(this);
-        String SYSTEM_SERVICE_TYPE = "INDUT_COOPERATIVE_RETURN";
+    }
+
+    /**
+     * 请求数据
+     */
+    private void loadData() {
         Params params = new Params(deviceId, SYSTEM_SERVICE_TYPE);
         Paramer paramer = new Paramer(params);
         if (loadingPopup == null) {
@@ -75,38 +105,39 @@ public class ProduceoutboundActivity extends BaseActivity implements View.OnClic
                 if (errcode == -1){
                     Toast.makeText(ProduceoutboundActivity.this, "网络异常", Toast.LENGTH_SHORT).show();
                 }else {
-                    List<ProduceoutboundOrderInfo> produceoutboundOrderInfos = dataResult.getT();
-                    if (produceoutboundOrderInfos == null || produceoutboundOrderInfos.isEmpty()){
+                    List<ProduceoutboundOrderInfo> ProduceoutboundOrderInfos = dataResult.getT();
+                    if (ProduceoutboundOrderInfos == null || ProduceoutboundOrderInfos.isEmpty()){
                         Toast.makeText(ProduceoutboundActivity.this, "数据为空", Toast.LENGTH_SHORT).show();
                     }else {
                         binding.incompleteCl.performClick();
-                        List<ProduceoutboundOrderInfo> orderInfos = LitePal.where("BB_STATE = ?", "4").find(ProduceoutboundOrderInfo.class);
-                        List<ProduceoutboundOrderInfo> orderInfos2 = LitePal.where("BB_STATE = ?", "1").find(ProduceoutboundOrderInfo.class);
-                        List<ProduceoutboundOrderInfo> orderInfos3 = LitePal.where("BB_STATE = ? and PDA_SCANNER_IS_END = ?", "3", "0").find(ProduceoutboundOrderInfo.class);
-                        int incompleteNum = orderInfos.size();
-                        int ongoingNum = orderInfos2.size();
-                        int completeNUm = orderInfos3.size();
-                        binding.incompleteNum.setText(incompleteNum+"");
-                        binding.ongoingNum.setText(ongoingNum+"");
-                        binding.completedNum.setText(completeNUm+"");
+                        loadViewCount();
                     }
                 }
             }
         });
     }
 
+
+
+    /**
+     * 顶部tab数量
+     */
+    private void loadViewCount() {
+        unFinishCount = LitePal.where("BB_STATE = ?", "4").count(ProduceoutboundOrderInfo.class);
+        doingCount = LitePal.where("BB_STATE = ?", "1").count(ProduceoutboundOrderInfo.class);
+        finishCount = LitePal.where("BB_STATE = ? and PDA_SCANNER_IS_END = ?", "3", "0").count(ProduceoutboundOrderInfo.class);
+
+        binding.incompleteNum.setText(unFinishCount + "");
+        binding.ongoingNum.setText(doingCount + "");
+        binding.completedNum.setText(finishCount + "");
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
-        List<ProduceoutboundOrderInfo> orderInfos = LitePal.where("BB_STATE = ?", "4").find(ProduceoutboundOrderInfo.class);
-        List<ProduceoutboundOrderInfo> orderInfos2 = LitePal.where("BB_STATE = ?", "1").find(ProduceoutboundOrderInfo.class);
-        List<ProduceoutboundOrderInfo> orderInfos3 = LitePal.where("BB_STATE = ? and PDA_SCANNER_IS_END = ?", "3", "0").find(ProduceoutboundOrderInfo.class);
-        int incompleteNum = orderInfos.size();
-        int ongoingNum = orderInfos2.size();
-        int completeNUm = orderInfos3.size();
-        binding.incompleteNum.setText(incompleteNum+"");
-        binding.ongoingNum.setText(ongoingNum+"");
-        binding.completedNum.setText(completeNUm+"");
+
+        loadViewCount();
+
         if (current == 1){
             binding.incompleteCl.performClick();
         }
@@ -136,45 +167,7 @@ public class ProduceoutboundActivity extends BaseActivity implements View.OnClic
             Fragment completedFragment = CompletedFragment.newInstance();
             getSupportFragmentManager().beginTransaction().replace(R.id.container, completedFragment).commit();
         }else if ((view.getId()) == R.id.right_cl){
-            String deviceId = DeviceUtils.getDevUUID(this);
-            String SYSTEM_SERVICE_TYPE = "INDUT_COOPERATIVE_RETURN";
-            Params params = new Params(deviceId, SYSTEM_SERVICE_TYPE);
-            Paramer paramer = new Paramer(params);
-            if (loadingPopup == null) {
-                loadingPopup = (LoadingPopupView)new XPopup.Builder(this)
-                        .dismissOnBackPressed(true)
-                        .isLightNavigationBar(true)
-                        .asLoading("加载中...")
-                        .show();
-            }else {
-                loadingPopup.show();
-            }
-            viewModel.PDA_H(paramer).observe(this, new Observer<DataResult<List<ProduceoutboundOrderInfo>>>() {
-                @Override
-                public void onChanged(DataResult<List<ProduceoutboundOrderInfo>> dataResult) {
-                    loadingPopup.dismiss();
-                    int errcode = dataResult.getErrcode();
-                    if (errcode == -1){
-                        Toast.makeText(ProduceoutboundActivity.this, "网络异常", Toast.LENGTH_SHORT).show();
-                    }else {
-                        List<ProduceoutboundOrderInfo> produceoutboundOrderInfos = dataResult.getT();
-                        if (produceoutboundOrderInfos == null || produceoutboundOrderInfos.isEmpty()){
-                            Toast.makeText(ProduceoutboundActivity.this, "数据为空", Toast.LENGTH_SHORT).show();
-                        }else {
-                            binding.incompleteCl.performClick();
-                            List<ProduceoutboundOrderInfo> orderInfos = LitePal.where("BB_STATE = ?", "4").find(ProduceoutboundOrderInfo.class);
-                            List<ProduceoutboundOrderInfo> orderInfos2 = LitePal.where("BB_STATE = ?", "1").find(ProduceoutboundOrderInfo.class);
-                            List<ProduceoutboundOrderInfo> orderInfos3 = LitePal.where("BB_STATE = ? and PDA_SCANNER_IS_END = ?", "3", "0").find(ProduceoutboundOrderInfo.class);
-                            int incompleteNum = orderInfos.size();
-                            int ongoingNum = orderInfos2.size();
-                            int completeNUm = orderInfos3.size();
-                            binding.incompleteNum.setText(incompleteNum+"");
-                            binding.ongoingNum.setText(ongoingNum+"");
-                            binding.completedNum.setText(completeNUm+"");
-                        }
-                    }
-                }
-            });
+            loadData();
         }
     }
 
@@ -231,9 +224,7 @@ public class ProduceoutboundActivity extends BaseActivity implements View.OnClic
     public void onMessageEvent(MessageEvent event){
         switch (event.what){
             case BusinessType.UPDATA_ONGOING:
-                List<ProduceoutboundOrderInfo> orderInfos2 = LitePal.where("BB_STATE = ? or BB_STATE = ? or BB_STATE = ?", "1", "3", "4").find(ProduceoutboundOrderInfo.class);
-                int ongoingNum = orderInfos2.size();
-                binding.ongoingNum.setText(ongoingNum+"");
+                loadViewCount();
                 break;
         }
     }
@@ -243,5 +234,5 @@ public class ProduceoutboundActivity extends BaseActivity implements View.OnClic
         super.onDestroy();
         EventBus.getDefault().unregister(this);
     }
-    
+
 }

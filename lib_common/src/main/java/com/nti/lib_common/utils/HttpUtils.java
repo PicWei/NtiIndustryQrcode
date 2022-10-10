@@ -74,18 +74,10 @@ public class HttpUtils {
                         .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                         .addConverterFactory(GsonConverterFactory.create())
                         .baseUrl("https://it.nti56.com").build();
-//            }
-//            else {
-//                mBuilder = new OkHttpClient.Builder()
-//                        .connectTimeout(60, TimeUnit.SECONDS)
-//                        .writeTimeout(60, TimeUnit.SECONDS)
-//                        .readTimeout(60, TimeUnit.SECONDS);
-//                retrofit = new Retrofit.Builder()
-//                        .client(mBuilder.build())
-//                        .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-//                        .addConverterFactory(GsonConverterFactory.create())
-//                        .baseUrl("http://10.1.5.179:8080").build();
-//            }
+
+                //测试服务
+                //http://10.159.40.216:10010/
+
         }catch (Exception e){
             e.printStackTrace();
         }

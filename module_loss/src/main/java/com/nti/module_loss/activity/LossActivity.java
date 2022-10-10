@@ -35,6 +35,8 @@ import org.greenrobot.eventbus.ThreadMode;
 import org.litepal.LitePal;
 
 import java.util.List;
+
+//工业仓库损溢 INDUT_WAREHOUSE_EXCESSIVE
 @Route(path = ARouterPath.LOSS_PAT)
 public class LossActivity extends BaseActivity implements View.OnClickListener {
 
