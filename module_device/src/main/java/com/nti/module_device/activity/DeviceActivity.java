@@ -22,6 +22,7 @@ import com.nti.lib_common.activity.BaseActivity;
 import com.nti.lib_common.bean.DataResult;
 import com.nti.lib_common.constants.ARouterPath;
 import com.nti.lib_common.utils.DeviceUtils;
+import com.nti.lib_common.utils.SPUtils;
 import com.nti.module_device.R;
 import com.nti.module_device.bean.PdaRegisterParam;
 import com.nti.module_device.bean.PdaRegisterParamer;
@@ -41,8 +42,6 @@ public class DeviceActivity extends BaseActivity {
 
     private ActivityDeviceBinding binding;
     private DeviceViewModel viewModel;
-    private SharedPreferences sp;
-    private SharedPreferences.Editor editor;
     private String SYSTEM_SERVICE_TYPE = "INDUT_SALES_FACTORY";
     private String[] spinner_item = new String[]{"工业销售出厂", "工业退货入库", "工业移库出库", "工业移库入库",
                                                  "工业合作生产到货入库", "工业合作生产退货出库", "工业出入库报废",
@@ -53,9 +52,8 @@ public class DeviceActivity extends BaseActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_device);
-        sp = getSharedPreferences("PDA_ACCOUNT", 0);
-        editor = sp.edit();
-        String devidename = sp.getString("pdaname", "");
+
+        String devidename = SPUtils.getDevicesName(this);
 
         ARouter.getInstance().inject(this);
         viewModel = new ViewModelProvider(this).get(DeviceViewModel.class);
@@ -139,8 +137,7 @@ public class DeviceActivity extends BaseActivity {
                             String code = jsonObject.get("code").toString().replace("\"", "");
                             String message = jsonObject.get("message").toString().replace("\"", "");
                             if (code.equals("0")){
-                                editor.putString("pdaname", pdaname);
-                                editor.commit();
+                                SPUtils.setDevicesName(DeviceActivity.this,pdaname);
                                 Toast.makeText(DeviceActivity.this, "注册成功", Toast.LENGTH_SHORT).show();
                             }else {
                                 Toast.makeText(DeviceActivity.this, message, Toast.LENGTH_SHORT).show();

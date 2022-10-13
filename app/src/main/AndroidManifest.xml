@@ -15,7 +15,7 @@
         android:maxAspectRatio="2.4"
         android:requestLegacyExternalStorage="true"
         android:resizeableActivity="true"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@mipmap/logo"
         android:supportsRtl="true"
         android:theme="@style/Theme.NtiIndustryQrcode"
         tools:replace="android:appComponentFactory"

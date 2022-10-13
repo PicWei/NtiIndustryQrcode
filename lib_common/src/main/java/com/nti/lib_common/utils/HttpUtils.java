@@ -76,7 +76,10 @@ public class HttpUtils {
                         .baseUrl("https://it.nti56.com").build();
 
                 //测试服务
-                //http://10.159.40.216:10010/
+                //http://10.159.40.216:10010
+                //开发环境
+                //https://it.nti56.com
+
 
         }catch (Exception e){
             e.printStackTrace();

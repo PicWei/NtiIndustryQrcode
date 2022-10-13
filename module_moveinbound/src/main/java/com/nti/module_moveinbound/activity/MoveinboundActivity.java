@@ -62,11 +62,15 @@ public class MoveinboundActivity extends BaseActivity implements View.OnClickLis
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         binding = DataBindingUtil.setContentView(this,R.layout.activity_moveinbound);
+
         EventBus.getDefault().register(this);
 
         initListener();
+
         viewModel = new ViewModelProvider(this).get(MoveinboundViewModel.class);
+
         deviceId = DeviceUtils.getDevUUID(this);
 
         loadData();
@@ -172,6 +176,7 @@ public class MoveinboundActivity extends BaseActivity implements View.OnClickLis
 
     private void swithTab(int tabId){
         if (tabId == R.id.incomplete_cl){
+
             binding.incompleteTv.setTextColor(getColor(R.color.text_press_bg));
             binding.incompleteNum.setTextColor(getColor(R.color.num_press));
             binding.rrNum01.setBackground(getDrawable(R.drawable.num_press_bg));

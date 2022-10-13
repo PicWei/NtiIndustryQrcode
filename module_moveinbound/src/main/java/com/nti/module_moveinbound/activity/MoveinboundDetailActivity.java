@@ -630,10 +630,7 @@ public class MoveinboundDetailActivity extends BaseActivity implements View.OnCl
 
 
                 if (bundle != null) {
-
                     String result = bundle.getString("data").trim();
-
-
                     if (!TextUtils.isEmpty(result)) {
                         mScannerResult = result;
                         mHandler.sendEmptyMessage(1);

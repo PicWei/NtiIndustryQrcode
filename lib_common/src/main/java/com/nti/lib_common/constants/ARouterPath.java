@@ -49,5 +49,4 @@ public class ARouterPath {
 
     //版本管理
     public static final String VERSION_PATH = "/version/VersionActivity";
-
 }
