@@ -23,7 +23,7 @@ public class SalesFactoryDetailRepository {
 
     public MutableLiveData<JsonObject> errorSignReceive(ErrorSignReceiveParamer paramer){
         final MutableLiveData<JsonObject> data = new MutableLiveData<>();
-        HttpUtils.getInstance().with(ISalesFactoryDetailService.class, true).errorSignReceive(paramer)
+        HttpUtils.getInstance().with(ISalesFactoryDetailService.class).errorSignReceive(paramer)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<JsonObject>() {

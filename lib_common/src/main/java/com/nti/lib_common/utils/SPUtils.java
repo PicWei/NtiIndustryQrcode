@@ -10,14 +10,9 @@ public class SPUtils{
 
     public static final String FILE_NAME = "share_data";
 
-
     public static final String SERVER_URL = "SERVER_URL";
 
-
     public static final String DEVICES_NAME = "DEVICES_NAME";
-
-
-
 
     /**
      *  服务器地址
@@ -37,7 +32,7 @@ public class SPUtils{
     public static String  getServerUrl(Context context){
         SharedPreferences sp = context.getSharedPreferences(FILE_NAME,
                 Context.MODE_PRIVATE);
-        return sp.getString(SERVER_URL, "");
+        return sp.getString(SERVER_URL, "https://it.nti56.com");
     }
 
 

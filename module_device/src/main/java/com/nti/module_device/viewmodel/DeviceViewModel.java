@@ -1,6 +1,7 @@
 package com.nti.module_device.viewmodel;
 
 import android.app.Application;
+import android.content.Context;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -24,12 +25,15 @@ public class DeviceViewModel extends AndroidViewModel {
     private MutableLiveData<DataResult<JsonObject>> data;
     private DeviceRepository repository = new DeviceRepository();
 
+
+
     public DeviceViewModel(@NonNull @NotNull Application application) {
         super(application);
+
     }
 
     public LiveData<DataResult<JsonObject>> register (PdaRegisterParamer paramer){
-        data = repository.register(paramer);
+        data = repository.register(paramer,getApplication());
         return data;
     }
 }

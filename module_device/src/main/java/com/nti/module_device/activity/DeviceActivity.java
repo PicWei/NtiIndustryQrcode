@@ -35,7 +35,7 @@ import java.util.List;
 
 
 @Route(path = ARouterPath.DEVICE_PATH)
-public class DeviceActivity extends BaseActivity {
+public class DeviceActivity extends BaseActivity implements View.OnClickListener{
 
     @Autowired
     public boolean flag;
@@ -48,6 +48,8 @@ public class DeviceActivity extends BaseActivity {
                                                  "工业出入库报废补码", "工业仓库损溢"
                                                  };
 
+
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,8 +57,12 @@ public class DeviceActivity extends BaseActivity {
 
         String devidename = SPUtils.getDevicesName(this);
 
+        binding.etServer.setText(SPUtils.getServerUrl(this));
+
         ARouter.getInstance().inject(this);
+
         viewModel = new ViewModelProvider(this).get(DeviceViewModel.class);
+
         if (flag){
             binding.registeType.setVisibility(View.GONE);
             binding.typeLabel.setVisibility(View.GONE);
@@ -153,4 +159,8 @@ public class DeviceActivity extends BaseActivity {
     }
 
 
+    @Override
+    public void onClick(View view) {
+
+    }
 }

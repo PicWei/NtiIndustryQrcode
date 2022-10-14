@@ -38,7 +38,7 @@ public class ProduceoutboundRepository {
     public MutableLiveData<DataResult<List<ProduceoutboundOrderInfo>>> PDA_H(Paramer paramer){
         final MutableLiveData<DataResult<List<ProduceoutboundOrderInfo>>> data = new MutableLiveData<>();
         final List<ProduceoutboundOrderInfo> orderInfos = new ArrayList<>();
-        HttpUtils.getInstance().with(IProduceoutboundService.class, true).PDA_H(paramer)
+        HttpUtils.getInstance().with(IProduceoutboundService.class).PDA_H(paramer)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<JsonObject>() {
@@ -203,7 +203,7 @@ public class ProduceoutboundRepository {
 
     public MutableLiveData<JsonObject> updataSellListStatues(UpParamer paramer){
         final MutableLiveData<JsonObject> data = new MutableLiveData<>();
-        HttpUtils.getInstance().with(IProduceoutboundService.class, true).updataSellListStatues(paramer)
+        HttpUtils.getInstance().with(IProduceoutboundService.class).updataSellListStatues(paramer)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<JsonObject>() {
@@ -233,7 +233,7 @@ public class ProduceoutboundRepository {
 
     public MutableLiveData<JsonObject> errorSignReceive(ErrorSignReceiveParamer paramer){
         final MutableLiveData<JsonObject> data = new MutableLiveData<>();
-        HttpUtils.getInstance().with(IProduceoutboundService.class, true).errorSignReceive(paramer)
+        HttpUtils.getInstance().with(IProduceoutboundService.class).errorSignReceive(paramer)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<JsonObject>() {

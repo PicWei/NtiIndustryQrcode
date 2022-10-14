@@ -1,5 +1,7 @@
 package com.nti.lib_common.utils;
 
+import android.content.Context;
+
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -52,7 +54,7 @@ public class HttpUtils {
      *
      * @return
      */
-    public Retrofit buildRetrofit(boolean iscer) {
+    public Retrofit buildRetrofit() {
         Retrofit retrofit = null;
         OkHttpClient.Builder mBuilder = null;
         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
@@ -60,7 +62,7 @@ public class HttpUtils {
         try {
             SSLContext sslContext = SSLContext.getInstance("SSL");
             sslContext.init(null, new TrustManager[]{trustManager}, new SecureRandom());
-//            if (iscer){
+
                 mBuilder = new OkHttpClient.Builder()
                         .connectTimeout(30, TimeUnit.SECONDS)
                         .writeTimeout(30, TimeUnit.SECONDS)
@@ -73,7 +75,9 @@ public class HttpUtils {
                         .client(mBuilder.build())
                         .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                         .addConverterFactory(GsonConverterFactory.create())
-                        .baseUrl("https://it.nti56.com").build();
+                        .baseUrl("https://it.nti56.com")
+                        .build();
+
 
                 //测试服务
                 //http://10.159.40.216:10010
@@ -88,9 +92,9 @@ public class HttpUtils {
     }
 
 
-    public static <T> T with(Class<T> clz, boolean iscer) {
+    public static <T> T with(Class<T> clz) {
 
-        return getInstance().buildRetrofit(iscer).create(clz);
+        return getInstance().buildRetrofit().create(clz);
     }
 
     //信任中心

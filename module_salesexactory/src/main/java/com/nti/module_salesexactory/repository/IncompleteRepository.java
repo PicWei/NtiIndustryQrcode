@@ -36,7 +36,7 @@ public class IncompleteRepository {
     public MutableLiveData<DataResult<List<SalesFactoryOrderInfo>>> PDA_H(Paramer paramer){
         final MutableLiveData<DataResult<List<SalesFactoryOrderInfo>>> data = new MutableLiveData<>();
         final List<SalesFactoryOrderInfo> orderInfos = new ArrayList<>();
-        HttpUtils.getInstance().with(IncompleteService.class, true).PDA_H(paramer)
+        HttpUtils.getInstance().with(IncompleteService.class).PDA_H(paramer)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<JsonObject>() {
@@ -196,7 +196,7 @@ public class IncompleteRepository {
 
     public MutableLiveData<JsonObject> updataSellListStatues(UpParamer paramer){
         final MutableLiveData<JsonObject> data = new MutableLiveData<>();
-        HttpUtils.getInstance().with(IncompleteService.class, true).updataSellListStatues(paramer)
+        HttpUtils.getInstance().with(IncompleteService.class).updataSellListStatues(paramer)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<JsonObject>() {

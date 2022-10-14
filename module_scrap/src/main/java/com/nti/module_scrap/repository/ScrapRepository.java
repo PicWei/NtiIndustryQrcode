@@ -36,7 +36,7 @@ public class ScrapRepository {
     public MutableLiveData<DataResult<List<ScrapOrderInfo>>> PDA_H(Paramer paramer){
         final MutableLiveData<DataResult<List<ScrapOrderInfo>>> data = new MutableLiveData<>();
         final List<ScrapOrderInfo> orderInfos = new ArrayList<>();
-        HttpUtils.getInstance().with(IScrapService.class, true).PDA_H(paramer)
+        HttpUtils.getInstance().with(IScrapService.class).PDA_H(paramer)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<JsonObject>() {
@@ -194,7 +194,7 @@ public class ScrapRepository {
 
     public MutableLiveData<JsonObject> updataSellListStatues(UpParamer paramer){
         final MutableLiveData<JsonObject> data = new MutableLiveData<>();
-        HttpUtils.getInstance().with(IScrapService.class, true).updataSellListStatues(paramer)
+        HttpUtils.getInstance().with(IScrapService.class).updataSellListStatues(paramer)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<JsonObject>() {
@@ -223,7 +223,7 @@ public class ScrapRepository {
 
     public MutableLiveData<JsonObject> errorSignReceive(ErrorSignReceiveParamer paramer){
         final MutableLiveData<JsonObject> data = new MutableLiveData<>();
-        HttpUtils.getInstance().with(IScrapService.class, true).errorSignReceive(paramer)
+        HttpUtils.getInstance().with(IScrapService.class).errorSignReceive(paramer)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<JsonObject>() {

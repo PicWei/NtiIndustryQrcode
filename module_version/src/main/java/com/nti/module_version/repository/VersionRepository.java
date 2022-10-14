@@ -39,7 +39,7 @@ import static com.nti.module_version.activity.VersionActivity.getUpdataInfo;
 public class VersionRepository {
     public MutableLiveData<DataResult<ResponseBody>> download(){
         MutableLiveData<DataResult<ResponseBody>> data = new MutableLiveData<>();
-        HttpUtils.getInstance().with(IVersionService.class, false).download()
+        HttpUtils.getInstance().with(IVersionService.class).download()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<ResponseBody>() {
@@ -71,7 +71,7 @@ public class VersionRepository {
 
     public MutableLiveData<Integer> downloadapk(){
         MutableLiveData<Integer> data = new MutableLiveData<>();
-        HttpUtils.getInstance().with(IVersionService.class, false).downloadapk()
+        HttpUtils.getInstance().with(IVersionService.class).downloadapk()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<ResponseBody>() {

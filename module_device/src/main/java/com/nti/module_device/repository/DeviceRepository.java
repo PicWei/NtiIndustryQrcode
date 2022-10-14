@@ -1,6 +1,8 @@
 package com.nti.module_device.repository;
 
-import android.util.Log;
+
+
+import android.app.Application;
 
 import androidx.lifecycle.MutableLiveData;
 
@@ -23,9 +25,9 @@ import io.reactivex.schedulers.Schedulers;
  * @describe
  */
 public class DeviceRepository {
-    public MutableLiveData<DataResult<JsonObject>> register (PdaRegisterParamer paramer){
+    public MutableLiveData<DataResult<JsonObject>> register (PdaRegisterParamer paramer, Application application){
         final MutableLiveData<DataResult<JsonObject>> data = new MutableLiveData<>();
-        HttpUtils.getInstance().with(IDeviceServie.class, true).register(paramer)
+        HttpUtils.getInstance().with(IDeviceServie.class).register(paramer)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<JsonObject>() {
